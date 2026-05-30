@@ -1,0 +1,43 @@
+{
+  "task_id": "task_001",
+  "question_quality_score": 0.9,
+  "answer_confidence": 0.82,
+  "detected_issues": [
+    "missing_citation"
+  ],
+  "agent_reasoning_summary": "Answer judged 'supported' (confidence 0.82). The evidence reports increased PDCD1, LAG3, and TIGIT in infiltrating T cells \"particularly within the CD8-positive population,\" which grounds the answer's claim that CD8 T cells expressing PDCD1 and LAG3 showed the strongest exhaustion signature. The answer omits TIGIT but otherwise faithfully captures the central finding.",
+  "refinement_applied": false,
+  "final_answer": "The strongest exhaustion signature was observed in CD8 T cells expressing PDCD1 and LAG3.",
+  "evidence": [
+    "The paper identified increased expression of PDCD1, LAG3, and TIGIT in infiltrating T cells, particularly within the CD8-positive population."
+  ],
+  "final_verdict": "supported",
+  "rubric_scores": {
+    "faithfulness": 0.95,
+    "completeness": 0.85,
+    "specificity": 0.8
+  },
+  "iterations": [
+    {
+      "step": 0,
+      "answer": "The strongest exhaustion signature was observed in CD8 T cells expressing PDCD1 and LAG3.",
+      "verdict": {
+        "verdict": "supported",
+        "confidence": 0.82,
+        "question_quality_score": 0.9,
+        "rubric": {
+          "faithfulness": 0.95,
+          "completeness": 0.85,
+          "specificity": 0.8
+        },
+        "detected_issues": [
+          "missing_citation"
+        ],
+        "rationale": "The evidence reports increased PDCD1, LAG3, and TIGIT in infiltrating T cells \"particularly within the CD8-positive population,\" which grounds the answer's claim that CD8 T cells expressing PDCD1 and LAG3 showed the strongest exhaustion signature. The answer omits TIGIT but otherwise faithfully captures the central finding."
+      },
+      "refined": false
+    }
+  ],
+  "ground_truth_signal": "supported",
+  "verdict_matches_ground_truth": true
+}
