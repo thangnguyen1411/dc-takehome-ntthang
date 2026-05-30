@@ -1,17 +1,22 @@
 {
   "task_id": "task_003",
-  "question_quality_score": 0.75,
-  "answer_confidence": 0.86,
+  "question_quality_score": 0.7,
+  "answer_confidence": 0.82,
   "detected_issues": [
     "weak_question"
   ],
-  "agent_reasoning_summary": "Initial verdict 'contradicted' (confidence 0.95) triggered refinement. After 1 pass(es) the answer is 'supported' (confidence 0.86). The answer faithfully restates both evidence claims: ALT/AST increased during treatment and proteomic analysis showed strong elevation of CYP2E1-related oxidative stress proteins. The question asks for a single \"most associated\" biomarker, which is slightly ambiguous given the evidence lists multiple, but the answer remains fully grounded in the supplied tokens.",
+  "agent_reasoning_summary": "Initial verdict 'contradicted' (confidence 0.95) triggered refinement. After 1 pass(es) the answer is 'supported' (confidence 0.82). The answer accurately restates all evidence tokens: increased ALT/AST during treatment and strong elevation of CYP2E1-related oxidative stress proteins from proteomic analysis. The question asks for the single \"most associated\" biomarker, but the evidence does not rank one biomarker over the others, so the question is slightly ambiguous; the answer reasonably presents both without over-claiming a singular winner.",
   "refinement_applied": true,
-  "final_answer": "The biomarkers most associated with hepatotoxicity progression were the liver enzymes ALT and AST, which increased during treatment. In addition, proteomic analysis highlighted a strong elevation of CYP2E1-related oxidative stress proteins.",
+  "final_answer": "The biomarkers most associated with hepatotoxicity progression were elevated ALT and AST levels, which increased during treatment. In addition, proteomic analysis highlighted a strong elevation of CYP2E1-related oxidative stress proteins.",
   "evidence": [
     "ALT and AST levels increased during treatment, while proteomic analysis highlighted strong elevation of CYP2E1-related oxidative stress proteins."
   ],
   "final_verdict": "supported",
+  "rubric_scores": {
+    "faithfulness": 0.97,
+    "completeness": 0.95,
+    "specificity": 0.8
+  },
   "iterations": [
     {
       "step": 0,
@@ -20,26 +25,36 @@
         "verdict": "contradicted",
         "confidence": 0.95,
         "question_quality_score": 0.9,
+        "rubric": {
+          "faithfulness": 0.0,
+          "completeness": 0.0,
+          "specificity": 0.1
+        },
         "detected_issues": [
           "contradicted",
           "hallucinated",
           "unsupported_claim"
         ],
-        "rationale": "The evidence cites ALT, AST, and CYP2E1-related oxidative stress proteins as the relevant biomarkers, whereas the answer names Troponin-I, a cardiac marker absent from the evidence and inconsistent with hepatotoxicity findings."
+        "rationale": "The evidence cites ALT, AST, and CYP2E1-related oxidative stress proteins as the relevant biomarkers, but the answer names \"Troponin-I,\" which is a cardiac marker absent from the evidence. This both introduces an unsupported entity and contradicts the evidence's central finding."
       },
       "refined": false
     },
     {
       "step": 1,
-      "answer": "The biomarkers most associated with hepatotoxicity progression were the liver enzymes ALT and AST, which increased during treatment. In addition, proteomic analysis highlighted a strong elevation of CYP2E1-related oxidative stress proteins.",
+      "answer": "The biomarkers most associated with hepatotoxicity progression were elevated ALT and AST levels, which increased during treatment. In addition, proteomic analysis highlighted a strong elevation of CYP2E1-related oxidative stress proteins.",
       "verdict": {
         "verdict": "supported",
-        "confidence": 0.86,
-        "question_quality_score": 0.75,
+        "confidence": 0.82,
+        "question_quality_score": 0.7,
+        "rubric": {
+          "faithfulness": 0.97,
+          "completeness": 0.95,
+          "specificity": 0.8
+        },
         "detected_issues": [
           "weak_question"
         ],
-        "rationale": "The answer faithfully restates both evidence claims: ALT/AST increased during treatment and proteomic analysis showed strong elevation of CYP2E1-related oxidative stress proteins. The question asks for a single \"most associated\" biomarker, which is slightly ambiguous given the evidence lists multiple, but the answer remains fully grounded in the supplied tokens."
+        "rationale": "The answer accurately restates all evidence tokens: increased ALT/AST during treatment and strong elevation of CYP2E1-related oxidative stress proteins from proteomic analysis. The question asks for the single \"most associated\" biomarker, but the evidence does not rank one biomarker over the others, so the question is slightly ambiguous; the answer reasonably presents both without over-claiming a singular winner."
       },
       "refined": true
     }

@@ -18,6 +18,8 @@ class Config:
     confidence_threshold: float = 0.75
     # Below this question_quality_score the question is flagged weak/ambiguous.
     question_quality_threshold: float = 0.5
+    # Below this, a rubric axis (faithfulness/completeness/specificity) is flagged.
+    rubric_threshold: float = 0.6
     # Hard cap on critic -> regenerate -> re-verify cycles per task.
     max_refine_iterations: int = 2
     max_tokens: int = 1024

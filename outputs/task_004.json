@@ -1,15 +1,20 @@
 {
   "task_id": "task_004",
   "question_quality_score": 0.95,
-  "answer_confidence": 0.97,
+  "answer_confidence": 0.96,
   "detected_issues": [],
-  "agent_reasoning_summary": "Initial verdict 'contradicted' (confidence 0.97) triggered refinement. After 1 pass(es) the answer is 'supported' (confidence 0.97). The evidence states \"Copy-number amplification and aneuploidy signals were strongest in the basal-like subtype across both genomic and transcriptomic analyses,\" which directly supports the answer's claim that the basal-like subtype had the highest chromosomal instability.",
+  "agent_reasoning_summary": "Initial verdict 'contradicted' (confidence 0.97) triggered refinement. After 1 pass(es) the answer is 'supported' (confidence 0.96). The evidence states \"copy-number amplification and aneuploidy signals were strongest in the basal-like subtype across both genomic and transcriptomic analyses,\" which directly supports the answer's claim that the basal-like subtype showed the highest chromosomal instability. The answer faithfully restates the evidence without over-claiming.",
   "refinement_applied": true,
-  "final_answer": "The basal-like subtype demonstrated the highest chromosomal instability, with the strongest copy-number amplification and aneuploidy signals across both genomic and transcriptomic analyses.",
+  "final_answer": "The basal-like subtype demonstrated the highest chromosomal instability, with copy-number amplification and aneuploidy signals being strongest in this subtype across both genomic and transcriptomic analyses.",
   "evidence": [
     "Copy-number amplification and aneuploidy signals were strongest in the basal-like subtype across both genomic and transcriptomic analyses."
   ],
   "final_verdict": "supported",
+  "rubric_scores": {
+    "faithfulness": 1.0,
+    "completeness": 1.0,
+    "specificity": 0.95
+  },
   "iterations": [
     {
       "step": 0,
@@ -17,23 +22,33 @@
       "verdict": {
         "verdict": "contradicted",
         "confidence": 0.97,
-        "question_quality_score": 0.9,
+        "question_quality_score": 0.95,
+        "rubric": {
+          "faithfulness": 0.0,
+          "completeness": 0.0,
+          "specificity": 0.2
+        },
         "detected_issues": [
           "contradicted"
         ],
-        "rationale": "The evidence states amplification and aneuploidy signals were strongest in the \"basal-like subtype,\" but the answer asserts \"Luminal A,\" directly opposing the evidence."
+        "rationale": "The evidence states copy-number amplification and aneuploidy signals were \"strongest in the basal-like subtype,\" directly opposing the answer's claim of \"Luminal A subtype.\""
       },
       "refined": false
     },
     {
       "step": 1,
-      "answer": "The basal-like subtype demonstrated the highest chromosomal instability, with the strongest copy-number amplification and aneuploidy signals across both genomic and transcriptomic analyses.",
+      "answer": "The basal-like subtype demonstrated the highest chromosomal instability, with copy-number amplification and aneuploidy signals being strongest in this subtype across both genomic and transcriptomic analyses.",
       "verdict": {
         "verdict": "supported",
-        "confidence": 0.97,
+        "confidence": 0.96,
         "question_quality_score": 0.95,
+        "rubric": {
+          "faithfulness": 1.0,
+          "completeness": 1.0,
+          "specificity": 0.95
+        },
         "detected_issues": [],
-        "rationale": "The evidence states \"Copy-number amplification and aneuploidy signals were strongest in the basal-like subtype across both genomic and transcriptomic analyses,\" which directly supports the answer's claim that the basal-like subtype had the highest chromosomal instability."
+        "rationale": "The evidence states \"copy-number amplification and aneuploidy signals were strongest in the basal-like subtype across both genomic and transcriptomic analyses,\" which directly supports the answer's claim that the basal-like subtype showed the highest chromosomal instability. The answer faithfully restates the evidence without over-claiming."
       },
       "refined": true
     }

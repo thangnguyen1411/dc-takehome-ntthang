@@ -3,37 +3,53 @@
   "question_quality_score": 0.9,
   "answer_confidence": 0.97,
   "detected_issues": [],
-  "agent_reasoning_summary": "Initial verdict 'contradicted' (confidence 0.96) triggered refinement. After 1 pass(es) the answer is 'supported' (confidence 0.97). The answer accurately reflects the evidence: CAFs \"clustered around hypoxic tumor regions\" with \"elevated COL1A1 and TGFB1 expression.\" The added phrase about non-uniform distribution is a reasonable restatement of the clustering pattern, not an unsupported claim.",
+  "agent_reasoning_summary": "Initial verdict 'contradicted' (confidence 0.97) triggered refinement. After 1 pass(es) the answer is 'supported' (confidence 0.97). The answer faithfully restates the evidence: CAFs \"clustered around hypoxic tumor regions\" with \"elevated COL1A1 and TGFB1 expression,\" capturing the central spatial finding without adding or contradicting anything.",
   "refinement_applied": true,
-  "final_answer": "Cancer-associated fibroblasts were not uniformly distributed; instead, they clustered around hypoxic tumor regions, where they showed elevated expression of COL1A1 and TGFB1.",
+  "final_answer": "Cancer-associated fibroblasts clustered around hypoxic tumor regions, where they showed elevated expression of COL1A1 and TGFB1.",
   "evidence": [
     "Cancer-associated fibroblasts clustered around hypoxic tumor regions with elevated COL1A1 and TGFB1 expression."
   ],
   "final_verdict": "supported",
+  "rubric_scores": {
+    "faithfulness": 1.0,
+    "completeness": 1.0,
+    "specificity": 0.95
+  },
   "iterations": [
     {
       "step": 0,
       "answer": "Fibroblasts were uniformly distributed throughout healthy tissue.",
       "verdict": {
         "verdict": "contradicted",
-        "confidence": 0.96,
-        "question_quality_score": 0.9,
+        "confidence": 0.97,
+        "question_quality_score": 0.85,
+        "rubric": {
+          "faithfulness": 0.0,
+          "completeness": 0.0,
+          "specificity": 0.1
+        },
         "detected_issues": [
-          "contradicted"
+          "contradicted",
+          "unsupported_claim"
         ],
-        "rationale": "The evidence states fibroblasts \"clustered around hypoxic tumor regions,\" directly opposing the answer's claim of \"uniformly distributed throughout healthy tissue.\""
+        "rationale": "The evidence states cancer-associated fibroblasts \"clustered around hypoxic tumor regions,\" directly opposing the answer's claim of \"uniformly distributed throughout healthy tissue.\" The answer contradicts both the spatial pattern (clustered vs. uniform) and the tissue context (tumor vs. healthy)."
       },
       "refined": false
     },
     {
       "step": 1,
-      "answer": "Cancer-associated fibroblasts were not uniformly distributed; instead, they clustered around hypoxic tumor regions, where they showed elevated expression of COL1A1 and TGFB1.",
+      "answer": "Cancer-associated fibroblasts clustered around hypoxic tumor regions, where they showed elevated expression of COL1A1 and TGFB1.",
       "verdict": {
         "verdict": "supported",
         "confidence": 0.97,
         "question_quality_score": 0.9,
+        "rubric": {
+          "faithfulness": 1.0,
+          "completeness": 1.0,
+          "specificity": 0.95
+        },
         "detected_issues": [],
-        "rationale": "The answer accurately reflects the evidence: CAFs \"clustered around hypoxic tumor regions\" with \"elevated COL1A1 and TGFB1 expression.\" The added phrase about non-uniform distribution is a reasonable restatement of the clustering pattern, not an unsupported claim."
+        "rationale": "The answer faithfully restates the evidence: CAFs \"clustered around hypoxic tumor regions\" with \"elevated COL1A1 and TGFB1 expression,\" capturing the central spatial finding without adding or contradicting anything."
       },
       "refined": true
     }

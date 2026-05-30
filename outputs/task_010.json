@@ -1,44 +1,60 @@
 {
   "task_id": "task_010",
-  "question_quality_score": 0.6,
+  "question_quality_score": 0.4,
   "answer_confidence": 0.9,
   "detected_issues": [
     "weak_question"
   ],
-  "agent_reasoning_summary": "Initial verdict 'unsupported' (confidence 0.82) triggered refinement. After 1 pass(es) the answer is 'supported' (confidence 0.90). The evidence states \"lipid metabolism and sphingolipid pathways showed significant dysregulation\" without ranking them, so the answer's claim that no strongest pathway is identified is faithful. The question presumes a ranking that the evidence does not provide, lowering question quality.",
+  "agent_reasoning_summary": "Initial verdict 'unsupported' (confidence 0.85) triggered refinement. After 1 pass(es) the answer is 'supported' (confidence 0.90). The evidence names \"lipid metabolism and sphingolipid pathways\" as showing \"significant dysregulation\" but provides no ranking, so the answer correctly declines to single out a strongest pathway. The question presupposes a ranking the evidence does not supply, lowering its quality.",
   "refinement_applied": true,
-  "final_answer": "The evidence does not rank the pathways or identify which showed the strongest dysregulation. It states only that both lipid metabolism and sphingolipid pathways showed significant dysregulation across patient cohorts.",
+  "final_answer": "The evidence does not identify which pathway showed the strongest dysregulation. It reports that both lipid metabolism and sphingolipid pathways showed significant dysregulation across patient cohorts, but it does not rank them or single out one as the most dysregulated.",
   "evidence": [
     "Lipid metabolism and sphingolipid pathways showed significant dysregulation across patient cohorts."
   ],
   "final_verdict": "supported",
+  "rubric_scores": {
+    "faithfulness": 1.0,
+    "completeness": 1.0,
+    "specificity": 0.95
+  },
   "iterations": [
     {
       "step": 0,
       "answer": "Sphingolipid metabolism showed the strongest dysregulation.",
       "verdict": {
         "verdict": "unsupported",
-        "confidence": 0.82,
-        "question_quality_score": 0.9,
+        "confidence": 0.85,
+        "question_quality_score": 0.7,
+        "rubric": {
+          "faithfulness": 0.4,
+          "completeness": 0.6,
+          "specificity": 0.3
+        },
         "detected_issues": [
           "unsupported",
-          "unsupported_claim"
+          "unsupported_claim",
+          "weak_question"
         ],
-        "rationale": "The evidence states both \"Lipid metabolism and sphingolipid pathways showed significant dysregulation\" but does not rank them or single out sphingolipid metabolism as the \"strongest.\" The answer's claim of relative strength is neither confirmed nor denied by the evidence."
+        "rationale": "The evidence states both \"lipid metabolism\" and \"sphingolipid pathways\" showed \"significant dysregulation\" but never ranks them or identifies one as strongest. The answer's superlative claim (\"strongest\") singling out sphingolipid metabolism is not supported by the evidence, which presents the two pathways without comparison. The question presupposes a ranking the evidence does not provide."
       },
       "refined": false
     },
     {
       "step": 1,
-      "answer": "The evidence does not rank the pathways or identify which showed the strongest dysregulation. It states only that both lipid metabolism and sphingolipid pathways showed significant dysregulation across patient cohorts.",
+      "answer": "The evidence does not identify which pathway showed the strongest dysregulation. It reports that both lipid metabolism and sphingolipid pathways showed significant dysregulation across patient cohorts, but it does not rank them or single out one as the most dysregulated.",
       "verdict": {
         "verdict": "supported",
         "confidence": 0.9,
-        "question_quality_score": 0.6,
+        "question_quality_score": 0.4,
+        "rubric": {
+          "faithfulness": 1.0,
+          "completeness": 1.0,
+          "specificity": 0.95
+        },
         "detected_issues": [
           "weak_question"
         ],
-        "rationale": "The evidence states \"lipid metabolism and sphingolipid pathways showed significant dysregulation\" without ranking them, so the answer's claim that no strongest pathway is identified is faithful. The question presumes a ranking that the evidence does not provide, lowering question quality."
+        "rationale": "The evidence names \"lipid metabolism and sphingolipid pathways\" as showing \"significant dysregulation\" but provides no ranking, so the answer correctly declines to single out a strongest pathway. The question presupposes a ranking the evidence does not supply, lowering its quality."
       },
       "refined": true
     }

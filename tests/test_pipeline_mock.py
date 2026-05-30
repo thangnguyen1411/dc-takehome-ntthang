@@ -84,6 +84,45 @@ def test_weak_question_and_low_confidence_are_flagged():
     assert "low_confidence" in issues
 
 
+def test_rubric_low_specificity_is_flagged_and_recorded():
+    class OverClaim:
+        def complete_structured(self, *, system, prompt, schema, tool_name):
+            return {
+                "verdict": "supported",
+                "confidence": 0.9,
+                "question_quality_score": 0.9,
+                "rubric": {"faithfulness": 0.9, "completeness": 0.8, "specificity": 0.3},
+                "detected_issues": [],
+                "rationale": "grounded but over-claims a superlative",
+            }
+
+    results = Pipeline.build(OverClaim(), Config()).run([_task(gt="supported")])
+    r = results[0]
+    # low specificity (0.3 < 0.6) becomes the "overclaim" tag
+    assert "overclaim" in r.detected_issues
+    assert "low_faithfulness" not in r.detected_issues  # 0.9 is fine
+    # rubric scores flow through to the structured output
+    assert r.rubric_scores.specificity == 0.3
+    assert r.rubric_scores.faithfulness == 0.9
+
+
+def test_verdict_defaults_rubric_when_omitted():
+    # a judge that omits `rubric` should still validate (defaults to 1.0s)
+    class NoRubric:
+        def complete_structured(self, *, system, prompt, schema, tool_name):
+            return {
+                "verdict": "supported",
+                "confidence": 0.95,
+                "question_quality_score": 0.9,
+                "detected_issues": [],
+                "rationale": "matches",
+            }
+
+    results = Pipeline.build(NoRubric(), Config()).run([_task(gt="supported")])
+    assert results[0].rubric_scores.specificity == 1.0
+    assert "overclaim" not in results[0].detected_issues
+
+
 def test_supported_answer_skips_refinement():
     class AllGood:
         def complete_structured(self, *, system, prompt, schema, tool_name):
