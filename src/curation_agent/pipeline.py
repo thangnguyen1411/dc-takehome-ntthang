@@ -10,7 +10,7 @@ from __future__ import annotations
 from .checks import DeterministicChecker
 from .config import Config
 from .llm import LLMClient
-from .models import CurationResult, Iteration, Task
+from .models import CurationResult, Iteration, RubricScores, Task
 from .refiner import Refiner
 from .verifier import Verifier
 
@@ -48,7 +48,10 @@ class Pipeline:
         derived = self._derived_issues(
             iterations[0].verdict.question_quality_score, final.verdict.confidence
         )
-        all_issues = sorted(set(det_issues) | set(final.verdict.detected_issues) | set(derived))
+        rubric_issues = self._rubric_issues(final.verdict.rubric)
+        all_issues = sorted(
+            set(det_issues) | set(final.verdict.detected_issues) | set(derived) | set(rubric_issues)
+        )
 
         return CurationResult(
             task_id=task.task_id,
@@ -60,6 +63,7 @@ class Pipeline:
             final_answer=final.answer,
             evidence=[task.reference_context],
             final_verdict=final.verdict.verdict,
+            rubric_scores=final.verdict.rubric,
             iterations=iterations,
         )
 
@@ -76,6 +80,21 @@ class Pipeline:
             issues.append("weak_question")
         if confidence < self._config.confidence_threshold:
             issues.append("low_confidence")
+        return issues
+
+    def _rubric_issues(self, rubric: RubricScores) -> list[str]:
+        """Map low rubric axes to actionable tags (orthogonal to the verdict).
+
+        Each axis below `rubric_threshold` gets a distinct tag so a curator can
+        see the *kind* of weakness: unfaithful, incomplete, or over-claimed.
+        """
+        issues: list[str] = []
+        if rubric.faithfulness < self._config.rubric_threshold:
+            issues.append("low_faithfulness")
+        if rubric.completeness < self._config.rubric_threshold:
+            issues.append("incomplete")
+        if rubric.specificity < self._config.rubric_threshold:
+            issues.append("overclaim")
         return issues
 
     @staticmethod

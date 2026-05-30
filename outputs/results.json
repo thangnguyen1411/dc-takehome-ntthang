@@ -1,26 +1,40 @@
 [
   {
     "task_id": "task_001",
-    "question_quality_score": 0.95,
-    "answer_confidence": 0.9,
-    "detected_issues": [],
-    "agent_reasoning_summary": "Answer judged 'supported' (confidence 0.90). The evidence states exhaustion markers PDCD1, LAG3, and TIGIT were increased in infiltrating T cells \"particularly within the CD8-positive population,\" directly backing the answer's claim about CD8 T cells expressing PDCD1 and LAG3.",
+    "question_quality_score": 0.9,
+    "answer_confidence": 0.82,
+    "detected_issues": [
+      "missing_citation"
+    ],
+    "agent_reasoning_summary": "Answer judged 'supported' (confidence 0.82). The evidence states exhaustion markers PDCD1, LAG3, and TIGIT were elevated in infiltrating T cells \"particularly within the CD8-positive population,\" directly supporting the answer's claim about CD8 T cells expressing PDCD1 and LAG3. The answer omits TIGIT but this is a minor incompleteness, and the \"strongest\" framing aligns with the evidence's \"particularly.\"",
     "refinement_applied": false,
     "final_answer": "The strongest exhaustion signature was observed in CD8 T cells expressing PDCD1 and LAG3.",
     "evidence": [
       "The paper identified increased expression of PDCD1, LAG3, and TIGIT in infiltrating T cells, particularly within the CD8-positive population."
     ],
     "final_verdict": "supported",
+    "rubric_scores": {
+      "faithfulness": 0.9,
+      "completeness": 0.85,
+      "specificity": 0.8
+    },
     "iterations": [
       {
         "step": 0,
         "answer": "The strongest exhaustion signature was observed in CD8 T cells expressing PDCD1 and LAG3.",
         "verdict": {
           "verdict": "supported",
-          "confidence": 0.9,
-          "question_quality_score": 0.95,
-          "detected_issues": [],
-          "rationale": "The evidence states exhaustion markers PDCD1, LAG3, and TIGIT were increased in infiltrating T cells \"particularly within the CD8-positive population,\" directly backing the answer's claim about CD8 T cells expressing PDCD1 and LAG3."
+          "confidence": 0.82,
+          "question_quality_score": 0.9,
+          "rubric": {
+            "faithfulness": 0.9,
+            "completeness": 0.85,
+            "specificity": 0.8
+          },
+          "detected_issues": [
+            "missing_citation"
+          ],
+          "rationale": "The evidence states exhaustion markers PDCD1, LAG3, and TIGIT were elevated in infiltrating T cells \"particularly within the CD8-positive population,\" directly supporting the answer's claim about CD8 T cells expressing PDCD1 and LAG3. The answer omits TIGIT but this is a minor incompleteness, and the \"strongest\" framing aligns with the evidence's \"particularly.\""
         },
         "refined": false
       }
@@ -30,18 +44,23 @@
   },
   {
     "task_id": "task_002",
-    "question_quality_score": 0.85,
-    "answer_confidence": 0.83,
+    "question_quality_score": 0.6,
+    "answer_confidence": 0.84,
     "detected_issues": [
-      "unsupported"
+      "weak_question"
     ],
-    "agent_reasoning_summary": "Initial verdict 'weak_reasoning' (confidence 0.70) triggered refinement. After 2 pass(es) the answer is 'unsupported' (confidence 0.83). The evidence states SHOC2 suppression \"restored downstream MAPK pathway control\" but never links any knockout to restored osimertinib sensitivity; the answer correctly declines to assert this, accurately reflecting the evidence gap.",
+    "agent_reasoning_summary": "Initial verdict 'weak_reasoning' (confidence 0.70) triggered refinement. After 1 pass(es) the answer is 'supported' (confidence 0.84). The answer faithfully restates the evidence (NF1 loss as resistance driver, SHOC2 suppression restoring MAPK pathway control) and correctly notes that the evidence never explicitly links restored MAPK control to restored osimertinib sensitivity. The question presupposes a fact not directly stated, and the answer appropriately flags this gap rather than over-claiming.",
     "refinement_applied": true,
-    "final_answer": "The evidence does not state that any gene knockout restored sensitivity to osimertinib. The genome-wide CRISPR knockout screen identified NF1 loss as a resistance driver, and it found that SHOC2 suppression restored downstream MAPK pathway control. However, the evidence links SHOC2 suppression only to regained MAPK pathway control, not to restored osimertinib sensitivity, so this specific question cannot be answered from the available information.</answer>\n</invoke>",
+    "final_answer": "The evidence does not state that any gene knockout restored sensitivity to osimertinib. It reports that a genome-wide CRISPR knockout screen identified NF1 loss as a driver of resistance, and that SHOC2 suppression restored downstream MAPK pathway control. Whether restoring MAPK pathway control translates into restored osimertinib sensitivity is not directly established by the evidence.</answer>\n</invoke>",
     "evidence": [
       "A genome-wide CRISPR knockout screen highlighted NF1 loss as a resistance driver, while SHOC2 suppression restored downstream MAPK pathway control."
     ],
-    "final_verdict": "unsupported",
+    "final_verdict": "supported",
+    "rubric_scores": {
+      "faithfulness": 0.95,
+      "completeness": 0.9,
+      "specificity": 0.9
+    },
     "iterations": [
       {
         "step": 0,
@@ -49,40 +68,36 @@
         "verdict": {
           "verdict": "weak_reasoning",
           "confidence": 0.7,
-          "question_quality_score": 0.85,
+          "question_quality_score": 0.9,
+          "rubric": {
+            "faithfulness": 0.65,
+            "completeness": 0.6,
+            "specificity": 0.7
+          },
           "detected_issues": [
             "weak_reasoning",
             "unsupported_claim"
           ],
-          "rationale": "The evidence states \"SHOC2 suppression restored downstream MAPK pathway control\" but never explicitly links this to restored sensitivity to osimertinib; the answer infers a drug-sensitivity outcome from a pathway-control statement, overstating what the evidence supports."
+          "rationale": "The evidence states SHOC2 suppression \"restored downstream MAPK pathway control,\" but it never explicitly says this restored sensitivity to osimertinib. The answer infers drug re-sensitization from a pathway-control statement, an extrapolation the evidence does not directly confirm."
         },
         "refined": false
       },
       {
         "step": 1,
-        "answer": "The evidence does not directly state that any gene knockout restored sensitivity to osimertinib. According to the CRISPR knockout screen, NF1 loss was identified as a resistance driver, and SHOC2 suppression restored downstream MAPK pathway control. However, the evidence links SHOC2 suppression only to regained MAPK pathway control, not explicitly to restored drug sensitivity, so a direct effect on osimertinib sensitivity cannot be confirmed from the available information.",
+        "answer": "The evidence does not state that any gene knockout restored sensitivity to osimertinib. It reports that a genome-wide CRISPR knockout screen identified NF1 loss as a driver of resistance, and that SHOC2 suppression restored downstream MAPK pathway control. Whether restoring MAPK pathway control translates into restored osimertinib sensitivity is not directly established by the evidence.</answer>\n</invoke>",
         "verdict": {
-          "verdict": "unsupported",
-          "confidence": 0.78,
-          "question_quality_score": 0.85,
+          "verdict": "supported",
+          "confidence": 0.84,
+          "question_quality_score": 0.6,
+          "rubric": {
+            "faithfulness": 0.95,
+            "completeness": 0.9,
+            "specificity": 0.9
+          },
           "detected_issues": [
-            "unsupported"
+            "weak_question"
           ],
-          "rationale": "The evidence states \"SHOC2 suppression restored downstream MAPK pathway control\" but never links any knockout to restored osimertinib sensitivity; the answer correctly declines to assert this, accurately noting the evidence neither confirms nor denies the specific claim about drug sensitivity."
-        },
-        "refined": true
-      },
-      {
-        "step": 2,
-        "answer": "The evidence does not state that any gene knockout restored sensitivity to osimertinib. The genome-wide CRISPR knockout screen identified NF1 loss as a resistance driver, and it found that SHOC2 suppression restored downstream MAPK pathway control. However, the evidence links SHOC2 suppression only to regained MAPK pathway control, not to restored osimertinib sensitivity, so this specific question cannot be answered from the available information.</answer>\n</invoke>",
-        "verdict": {
-          "verdict": "unsupported",
-          "confidence": 0.83,
-          "question_quality_score": 0.85,
-          "detected_issues": [
-            "unsupported"
-          ],
-          "rationale": "The evidence states SHOC2 suppression \"restored downstream MAPK pathway control\" but never links any knockout to restored osimertinib sensitivity; the answer correctly declines to assert this, accurately reflecting the evidence gap."
+          "rationale": "The answer faithfully restates the evidence (NF1 loss as resistance driver, SHOC2 suppression restoring MAPK pathway control) and correctly notes that the evidence never explicitly links restored MAPK control to restored osimertinib sensitivity. The question presupposes a fact not directly stated, and the answer appropriately flags this gap rather than over-claiming."
         },
         "refined": true
       }
@@ -92,18 +107,23 @@
   },
   {
     "task_id": "task_003",
-    "question_quality_score": 0.75,
+    "question_quality_score": 0.6,
     "answer_confidence": 0.86,
     "detected_issues": [
       "weak_question"
     ],
-    "agent_reasoning_summary": "Initial verdict 'contradicted' (confidence 0.95) triggered refinement. After 1 pass(es) the answer is 'supported' (confidence 0.86). The answer faithfully restates both evidence claims: ALT/AST increased during treatment and proteomic analysis showed strong elevation of CYP2E1-related oxidative stress proteins. The question asks for a single \"most associated\" biomarker, which is slightly ambiguous given the evidence lists multiple, but the answer remains fully grounded in the supplied tokens.",
+    "agent_reasoning_summary": "Initial verdict 'contradicted' (confidence 0.95) triggered refinement. After 1 pass(es) the answer is 'supported' (confidence 0.86). The answer faithfully restates the evidence tokens (ALT/AST increase, CYP2E1-related oxidative stress proteins) and correctly notes the evidence does not single out a single \"most\" associated biomarker, avoiding over-claiming. The question presupposes one top biomarker that the evidence does not isolate, lowering question quality.",
     "refinement_applied": true,
-    "final_answer": "The biomarkers most associated with hepatotoxicity progression were the liver enzymes ALT and AST, which increased during treatment. In addition, proteomic analysis highlighted a strong elevation of CYP2E1-related oxidative stress proteins.",
+    "final_answer": "According to the evidence, ALT and AST levels increased during treatment, and proteomic analysis highlighted a strong elevation of CYP2E1-related oxidative stress proteins. These were the biomarkers associated with hepatotoxicity progression. The evidence does not single out one biomarker as the most strongly associated with progression.",
     "evidence": [
       "ALT and AST levels increased during treatment, while proteomic analysis highlighted strong elevation of CYP2E1-related oxidative stress proteins."
     ],
     "final_verdict": "supported",
+    "rubric_scores": {
+      "faithfulness": 0.97,
+      "completeness": 0.9,
+      "specificity": 0.85
+    },
     "iterations": [
       {
         "step": 0,
@@ -112,26 +132,36 @@
           "verdict": "contradicted",
           "confidence": 0.95,
           "question_quality_score": 0.9,
+          "rubric": {
+            "faithfulness": 0.0,
+            "completeness": 0.0,
+            "specificity": 0.1
+          },
           "detected_issues": [
             "contradicted",
             "hallucinated",
             "unsupported_claim"
           ],
-          "rationale": "The evidence cites ALT, AST, and CYP2E1-related oxidative stress proteins as the relevant biomarkers, whereas the answer names Troponin-I, a cardiac marker absent from the evidence and inconsistent with hepatotoxicity findings."
+          "rationale": "The evidence cites ALT, AST, and CYP2E1-related oxidative stress proteins as the relevant biomarkers, but the answer names \"Troponin-I,\" which is absent from the evidence and is a cardiac (not hepatic) marker. The answer fabricates an entity and over-claims with \"strongest\" without any support."
         },
         "refined": false
       },
       {
         "step": 1,
-        "answer": "The biomarkers most associated with hepatotoxicity progression were the liver enzymes ALT and AST, which increased during treatment. In addition, proteomic analysis highlighted a strong elevation of CYP2E1-related oxidative stress proteins.",
+        "answer": "According to the evidence, ALT and AST levels increased during treatment, and proteomic analysis highlighted a strong elevation of CYP2E1-related oxidative stress proteins. These were the biomarkers associated with hepatotoxicity progression. The evidence does not single out one biomarker as the most strongly associated with progression.",
         "verdict": {
           "verdict": "supported",
           "confidence": 0.86,
-          "question_quality_score": 0.75,
+          "question_quality_score": 0.6,
+          "rubric": {
+            "faithfulness": 0.97,
+            "completeness": 0.9,
+            "specificity": 0.85
+          },
           "detected_issues": [
             "weak_question"
           ],
-          "rationale": "The answer faithfully restates both evidence claims: ALT/AST increased during treatment and proteomic analysis showed strong elevation of CYP2E1-related oxidative stress proteins. The question asks for a single \"most associated\" biomarker, which is slightly ambiguous given the evidence lists multiple, but the answer remains fully grounded in the supplied tokens."
+          "rationale": "The answer faithfully restates the evidence tokens (ALT/AST increase, CYP2E1-related oxidative stress proteins) and correctly notes the evidence does not single out a single \"most\" associated biomarker, avoiding over-claiming. The question presupposes one top biomarker that the evidence does not isolate, lowering question quality."
         },
         "refined": true
       }
@@ -141,16 +171,21 @@
   },
   {
     "task_id": "task_004",
-    "question_quality_score": 0.95,
-    "answer_confidence": 0.97,
+    "question_quality_score": 0.9,
+    "answer_confidence": 0.95,
     "detected_issues": [],
-    "agent_reasoning_summary": "Initial verdict 'contradicted' (confidence 0.97) triggered refinement. After 1 pass(es) the answer is 'supported' (confidence 0.97). The evidence states \"Copy-number amplification and aneuploidy signals were strongest in the basal-like subtype across both genomic and transcriptomic analyses,\" which directly supports the answer's claim that the basal-like subtype had the highest chromosomal instability.",
+    "agent_reasoning_summary": "Initial verdict 'contradicted' (confidence 0.97) triggered refinement. After 1 pass(es) the answer is 'supported' (confidence 0.95). The evidence states copy-number amplification and aneuploidy signals were \"strongest in the basal-like subtype across both genomic and transcriptomic analyses,\" which directly supports the answer's claim of highest chromosomal instability. The answer faithfully restates these specific signal types and the dual-analysis context.",
     "refinement_applied": true,
-    "final_answer": "The basal-like subtype demonstrated the highest chromosomal instability, with the strongest copy-number amplification and aneuploidy signals across both genomic and transcriptomic analyses.",
+    "final_answer": "The basal-like subtype demonstrated the highest chromosomal instability, showing the strongest copy-number amplification and aneuploidy signals across both genomic and transcriptomic analyses.",
     "evidence": [
       "Copy-number amplification and aneuploidy signals were strongest in the basal-like subtype across both genomic and transcriptomic analyses."
     ],
     "final_verdict": "supported",
+    "rubric_scores": {
+      "faithfulness": 1.0,
+      "completeness": 1.0,
+      "specificity": 0.95
+    },
     "iterations": [
       {
         "step": 0,
@@ -159,22 +194,32 @@
           "verdict": "contradicted",
           "confidence": 0.97,
           "question_quality_score": 0.9,
+          "rubric": {
+            "faithfulness": 0.0,
+            "completeness": 0.2,
+            "specificity": 0.3
+          },
           "detected_issues": [
             "contradicted"
           ],
-          "rationale": "The evidence states amplification and aneuploidy signals were strongest in the \"basal-like subtype,\" but the answer asserts \"Luminal A,\" directly opposing the evidence."
+          "rationale": "The evidence states amplification and aneuploidy signals (markers of chromosomal instability) were \"strongest in the basal-like subtype,\" but the answer names \"Luminal A,\" directly opposing the evidence."
         },
         "refined": false
       },
       {
         "step": 1,
-        "answer": "The basal-like subtype demonstrated the highest chromosomal instability, with the strongest copy-number amplification and aneuploidy signals across both genomic and transcriptomic analyses.",
+        "answer": "The basal-like subtype demonstrated the highest chromosomal instability, showing the strongest copy-number amplification and aneuploidy signals across both genomic and transcriptomic analyses.",
         "verdict": {
           "verdict": "supported",
-          "confidence": 0.97,
-          "question_quality_score": 0.95,
+          "confidence": 0.95,
+          "question_quality_score": 0.9,
+          "rubric": {
+            "faithfulness": 1.0,
+            "completeness": 1.0,
+            "specificity": 0.95
+          },
           "detected_issues": [],
-          "rationale": "The evidence states \"Copy-number amplification and aneuploidy signals were strongest in the basal-like subtype across both genomic and transcriptomic analyses,\" which directly supports the answer's claim that the basal-like subtype had the highest chromosomal instability."
+          "rationale": "The evidence states copy-number amplification and aneuploidy signals were \"strongest in the basal-like subtype across both genomic and transcriptomic analyses,\" which directly supports the answer's claim of highest chromosomal instability. The answer faithfully restates these specific signal types and the dual-analysis context."
         },
         "refined": true
       }
@@ -184,18 +229,23 @@
   },
   {
     "task_id": "task_005",
-    "question_quality_score": 0.7,
+    "question_quality_score": 0.6,
     "answer_confidence": 0.9,
     "detected_issues": [
       "weak_question"
     ],
-    "agent_reasoning_summary": "Initial verdict 'weak_reasoning' (confidence 0.78) triggered refinement. After 1 pass(es) the answer is 'supported' (confidence 0.90). The evidence cites two features (\"high interferon-gamma signaling\" and \"elevated CD8 infiltration\") that \"correlated strongly\" without ranking them, and the answer faithfully reports this while correctly noting no single most-predictive feature is identified. The question presupposes a single \"most predictive\" feature that the evidence does not actually single out, lowering its quality.",
+    "agent_reasoning_summary": "Initial verdict 'weak_reasoning' (confidence 0.78) triggered refinement. After 1 pass(es) the answer is 'supported' (confidence 0.90). The question presupposes a single \"most predictive\" feature, but the evidence only states that both \"interferon-gamma signaling\" and \"elevated CD8 infiltration\" \"correlated strongly\" without ranking. The answer faithfully captures both features and correctly declines to over-claim a single top predictor.",
     "refinement_applied": true,
-    "final_answer": "The evidence does not identify a single most predictive feature. Rather, two features both correlated strongly with immunotherapy response: high interferon-gamma signaling and elevated CD8 infiltration. The evidence does not rank one above the other.",
+    "final_answer": "The evidence does not identify a single most predictive feature. Two features\u2014high interferon-gamma signaling and elevated CD8 infiltration\u2014both correlated strongly with immunotherapy response, without one being ranked above the other.",
     "evidence": [
       "High interferon-gamma signaling and elevated CD8 infiltration correlated strongly with treatment response."
     ],
     "final_verdict": "supported",
+    "rubric_scores": {
+      "faithfulness": 1.0,
+      "completeness": 1.0,
+      "specificity": 0.95
+    },
     "iterations": [
       {
         "step": 0,
@@ -204,25 +254,35 @@
           "verdict": "weak_reasoning",
           "confidence": 0.78,
           "question_quality_score": 0.85,
+          "rubric": {
+            "faithfulness": 0.7,
+            "completeness": 0.6,
+            "specificity": 0.4
+          },
           "detected_issues": [
             "weak_reasoning",
             "unsupported_claim"
           ],
-          "rationale": "The evidence lists two features (\"interferon-gamma signaling\" and \"CD8 infiltration\") that both \"correlated strongly\" with response, but it never ranks one as \"most predictive.\" The answer singles out interferon-gamma as the top feature, an unsupported claim that overstates and misattributes the relative importance the evidence does not establish."
+          "rationale": "The evidence lists two features (\"high interferon-gamma signaling\" and \"elevated CD8 infiltration\") that both \"correlated strongly\" without ranking one above the other. The answer's superlative \"most predictive\" for interferon-gamma alone over-claims a comparative ranking the evidence does not establish, while omitting the equally weighted CD8 infiltration."
         },
         "refined": false
       },
       {
         "step": 1,
-        "answer": "The evidence does not identify a single most predictive feature. Rather, two features both correlated strongly with immunotherapy response: high interferon-gamma signaling and elevated CD8 infiltration. The evidence does not rank one above the other.",
+        "answer": "The evidence does not identify a single most predictive feature. Two features\u2014high interferon-gamma signaling and elevated CD8 infiltration\u2014both correlated strongly with immunotherapy response, without one being ranked above the other.",
         "verdict": {
           "verdict": "supported",
           "confidence": 0.9,
-          "question_quality_score": 0.7,
+          "question_quality_score": 0.6,
+          "rubric": {
+            "faithfulness": 1.0,
+            "completeness": 1.0,
+            "specificity": 0.95
+          },
           "detected_issues": [
             "weak_question"
           ],
-          "rationale": "The evidence cites two features (\"high interferon-gamma signaling\" and \"elevated CD8 infiltration\") that \"correlated strongly\" without ranking them, and the answer faithfully reports this while correctly noting no single most-predictive feature is identified. The question presupposes a single \"most predictive\" feature that the evidence does not actually single out, lowering its quality."
+          "rationale": "The question presupposes a single \"most predictive\" feature, but the evidence only states that both \"interferon-gamma signaling\" and \"elevated CD8 infiltration\" \"correlated strongly\" without ranking. The answer faithfully captures both features and correctly declines to over-claim a single top predictor."
         },
         "refined": true
       }
@@ -233,39 +293,55 @@
   {
     "task_id": "task_006",
     "question_quality_score": 0.9,
-    "answer_confidence": 0.97,
+    "answer_confidence": 0.98,
     "detected_issues": [],
-    "agent_reasoning_summary": "Initial verdict 'contradicted' (confidence 0.96) triggered refinement. After 1 pass(es) the answer is 'supported' (confidence 0.97). The answer accurately reflects the evidence: CAFs \"clustered around hypoxic tumor regions\" with \"elevated COL1A1 and TGFB1 expression.\" The added phrase about non-uniform distribution is a reasonable restatement of the clustering pattern, not an unsupported claim.",
+    "agent_reasoning_summary": "Initial verdict 'contradicted' (confidence 0.97) triggered refinement. After 1 pass(es) the answer is 'supported' (confidence 0.98). The answer faithfully restates the evidence: CAFs \"clustered around hypoxic tumor regions\" with \"elevated COL1A1 and TGFB1 expression,\" capturing both the spatial pattern and the associated markers without adding or contradicting anything.",
     "refinement_applied": true,
-    "final_answer": "Cancer-associated fibroblasts were not uniformly distributed; instead, they clustered around hypoxic tumor regions, where they showed elevated expression of COL1A1 and TGFB1.",
+    "final_answer": "Cancer-associated fibroblasts clustered around hypoxic tumor regions, where they showed elevated expression of COL1A1 and TGFB1.",
     "evidence": [
       "Cancer-associated fibroblasts clustered around hypoxic tumor regions with elevated COL1A1 and TGFB1 expression."
     ],
     "final_verdict": "supported",
+    "rubric_scores": {
+      "faithfulness": 1.0,
+      "completeness": 1.0,
+      "specificity": 1.0
+    },
     "iterations": [
       {
         "step": 0,
         "answer": "Fibroblasts were uniformly distributed throughout healthy tissue.",
         "verdict": {
           "verdict": "contradicted",
-          "confidence": 0.96,
+          "confidence": 0.97,
           "question_quality_score": 0.9,
+          "rubric": {
+            "faithfulness": 0.0,
+            "completeness": 0.0,
+            "specificity": 0.1
+          },
           "detected_issues": [
-            "contradicted"
+            "contradicted",
+            "unsupported_claim"
           ],
-          "rationale": "The evidence states fibroblasts \"clustered around hypoxic tumor regions,\" directly opposing the answer's claim of \"uniformly distributed throughout healthy tissue.\""
+          "rationale": "The evidence states cancer-associated fibroblasts \"clustered around hypoxic tumor regions\" with elevated COL1A1 and TGFB1, whereas the answer claims a \"uniform distribution throughout healthy tissue\" \u2014 directly opposing both the clustered spatial pattern and the tumor context."
         },
         "refined": false
       },
       {
         "step": 1,
-        "answer": "Cancer-associated fibroblasts were not uniformly distributed; instead, they clustered around hypoxic tumor regions, where they showed elevated expression of COL1A1 and TGFB1.",
+        "answer": "Cancer-associated fibroblasts clustered around hypoxic tumor regions, where they showed elevated expression of COL1A1 and TGFB1.",
         "verdict": {
           "verdict": "supported",
-          "confidence": 0.97,
+          "confidence": 0.98,
           "question_quality_score": 0.9,
+          "rubric": {
+            "faithfulness": 1.0,
+            "completeness": 1.0,
+            "specificity": 1.0
+          },
           "detected_issues": [],
-          "rationale": "The answer accurately reflects the evidence: CAFs \"clustered around hypoxic tumor regions\" with \"elevated COL1A1 and TGFB1 expression.\" The added phrase about non-uniform distribution is a reasonable restatement of the clustering pattern, not an unsupported claim."
+          "rationale": "The answer faithfully restates the evidence: CAFs \"clustered around hypoxic tumor regions\" with \"elevated COL1A1 and TGFB1 expression,\" capturing both the spatial pattern and the associated markers without adding or contradicting anything."
         },
         "refined": true
       }
@@ -275,26 +351,40 @@
   },
   {
     "task_id": "task_007",
-    "question_quality_score": 0.9,
-    "answer_confidence": 0.9,
-    "detected_issues": [],
-    "agent_reasoning_summary": "Answer judged 'supported' (confidence 0.90). The evidence states \"validation experiments supporting Nintedanib activity,\" directly backing the answer's claim that Nintedanib showed anti-fibrotic potential.",
+    "question_quality_score": 0.85,
+    "answer_confidence": 0.82,
+    "detected_issues": [
+      "unsupported_claim"
+    ],
+    "agent_reasoning_summary": "Answer judged 'supported' (confidence 0.82). The evidence names Nintedanib as ranked highly with validation experiments supporting its activity, so the core claim is grounded. However, the answer's superlative \"strong\" overstates the evidence, which only says \"supporting Nintedanib activity\" without quantifying magnitude, slightly lowering specificity.",
     "refinement_applied": false,
     "final_answer": "Nintedanib showed strong anti-fibrotic potential.",
     "evidence": [
       "The model ranked Nintedanib and Pirfenidone highly, with validation experiments supporting Nintedanib activity."
     ],
     "final_verdict": "supported",
+    "rubric_scores": {
+      "faithfulness": 0.9,
+      "completeness": 0.85,
+      "specificity": 0.7
+    },
     "iterations": [
       {
         "step": 0,
         "answer": "Nintedanib showed strong anti-fibrotic potential.",
         "verdict": {
           "verdict": "supported",
-          "confidence": 0.9,
-          "question_quality_score": 0.9,
-          "detected_issues": [],
-          "rationale": "The evidence states \"validation experiments supporting Nintedanib activity,\" directly backing the answer's claim that Nintedanib showed anti-fibrotic potential."
+          "confidence": 0.82,
+          "question_quality_score": 0.85,
+          "rubric": {
+            "faithfulness": 0.9,
+            "completeness": 0.85,
+            "specificity": 0.7
+          },
+          "detected_issues": [
+            "unsupported_claim"
+          ],
+          "rationale": "The evidence names Nintedanib as ranked highly with validation experiments supporting its activity, so the core claim is grounded. However, the answer's superlative \"strong\" overstates the evidence, which only says \"supporting Nintedanib activity\" without quantifying magnitude, slightly lowering specificity."
         },
         "refined": false
       }
@@ -305,15 +395,20 @@
   {
     "task_id": "task_008",
     "question_quality_score": 0.85,
-    "answer_confidence": 0.97,
+    "answer_confidence": 0.95,
     "detected_issues": [],
-    "agent_reasoning_summary": "Initial verdict 'contradicted' (confidence 0.96) triggered refinement. After 1 pass(es) the answer is 'supported' (confidence 0.97). The answer faithfully restates the evidence: \"RNA velocity vectors\" indicating a \"differentiation path from progenitor cells toward neuronal lineage commitment.\" No claims exceed the evidence.",
+    "agent_reasoning_summary": "Initial verdict 'contradicted' (confidence 0.96) triggered refinement. After 1 pass(es) the answer is 'supported' (confidence 0.95). The answer faithfully restates the evidence's central claim that RNA velocity vectors indicated a differentiation path \"from progenitor cells toward neuronal lineage commitment.\" All entities and relationships are grounded in the evidence with no over-claiming.",
     "refinement_applied": true,
     "final_answer": "RNA velocity vectors identified a differentiation trajectory from progenitor cells toward neuronal lineage commitment.",
     "evidence": [
       "RNA velocity vectors suggested a differentiation path from progenitor cells toward neuronal lineage commitment."
     ],
     "final_verdict": "supported",
+    "rubric_scores": {
+      "faithfulness": 1.0,
+      "completeness": 1.0,
+      "specificity": 0.95
+    },
     "iterations": [
       {
         "step": 0,
@@ -322,10 +417,16 @@
           "verdict": "contradicted",
           "confidence": 0.96,
           "question_quality_score": 0.85,
+          "rubric": {
+            "faithfulness": 0.02,
+            "completeness": 0.1,
+            "specificity": 0.2
+          },
           "detected_issues": [
-            "contradicted"
+            "contradicted",
+            "unsupported_claim"
           ],
-          "rationale": "The evidence states RNA velocity indicated a path \"from progenitor cells toward neuronal lineage commitment,\" whereas the answer asserts the reverse\u2014mature neurons reverting to pluripotent stem cells\u2014directly opposing both the direction and cell identities described."
+          "rationale": "The evidence describes a differentiation path from progenitor cells toward neuronal lineage commitment, whereas the answer asserts the reverse \u2014 mature neurons reverting to pluripotent stem cells \u2014 directly opposing the stated trajectory direction."
         },
         "refined": false
       },
@@ -334,10 +435,15 @@
         "answer": "RNA velocity vectors identified a differentiation trajectory from progenitor cells toward neuronal lineage commitment.",
         "verdict": {
           "verdict": "supported",
-          "confidence": 0.97,
+          "confidence": 0.95,
           "question_quality_score": 0.85,
+          "rubric": {
+            "faithfulness": 1.0,
+            "completeness": 1.0,
+            "specificity": 0.95
+          },
           "detected_issues": [],
-          "rationale": "The answer faithfully restates the evidence: \"RNA velocity vectors\" indicating a \"differentiation path from progenitor cells toward neuronal lineage commitment.\" No claims exceed the evidence."
+          "rationale": "The answer faithfully restates the evidence's central claim that RNA velocity vectors indicated a differentiation path \"from progenitor cells toward neuronal lineage commitment.\" All entities and relationships are grounded in the evidence with no over-claiming."
         },
         "refined": true
       }
@@ -350,13 +456,18 @@
     "question_quality_score": 0.9,
     "answer_confidence": 0.97,
     "detected_issues": [],
-    "agent_reasoning_summary": "Initial verdict 'contradicted' (confidence 0.95) triggered refinement. After 1 pass(es) the answer is 'supported' (confidence 0.97). The answer directly mirrors the evidence, citing both \"hallucinated biological mechanisms\" and \"failed multi-step reasoning tasks\" as the failure modes in smaller models. The question is clear and specific, though it asks for a single primary mode while the evidence lists two.",
+    "agent_reasoning_summary": "Initial verdict 'contradicted' (confidence 0.95) triggered refinement. After 1 pass(es) the answer is 'supported' (confidence 0.97). The answer directly mirrors the evidence, citing both \"hallucinated biological mechanisms\" and \"failed multi-step reasoning tasks\" as the failure modes in smaller models. All claims are grounded in the evidence with no additions or contradictions.",
     "refinement_applied": true,
     "final_answer": "The primary failure modes observed in smaller models were hallucinating biological mechanisms and failing multi-step reasoning tasks.",
     "evidence": [
       "Smaller models frequently hallucinated biological mechanisms and failed multi-step reasoning tasks."
     ],
     "final_verdict": "supported",
+    "rubric_scores": {
+      "faithfulness": 1.0,
+      "completeness": 1.0,
+      "specificity": 0.95
+    },
     "iterations": [
       {
         "step": 0,
@@ -365,11 +476,16 @@
           "verdict": "contradicted",
           "confidence": 0.95,
           "question_quality_score": 0.9,
+          "rubric": {
+            "faithfulness": 0.05,
+            "completeness": 0.1,
+            "specificity": 0.2
+          },
           "detected_issues": [
             "contradicted",
             "unsupported_claim"
           ],
-          "rationale": "The evidence states smaller models \"hallucinated biological mechanisms and failed multi-step reasoning tasks,\" but the answer claims the failure was due to \"syntax formatting issues,\" which directly opposes and is absent from the evidence."
+          "rationale": "The evidence states smaller models \"frequently hallucinated biological mechanisms and failed multi-step reasoning tasks,\" but the answer attributes failures to \"syntax formatting issues,\" which is directly opposed to and absent from the evidence."
         },
         "refined": false
       },
@@ -380,8 +496,13 @@
           "verdict": "supported",
           "confidence": 0.97,
           "question_quality_score": 0.9,
+          "rubric": {
+            "faithfulness": 1.0,
+            "completeness": 1.0,
+            "specificity": 0.95
+          },
           "detected_issues": [],
-          "rationale": "The answer directly mirrors the evidence, citing both \"hallucinated biological mechanisms\" and \"failed multi-step reasoning tasks\" as the failure modes in smaller models. The question is clear and specific, though it asks for a single primary mode while the evidence lists two."
+          "rationale": "The answer directly mirrors the evidence, citing both \"hallucinated biological mechanisms\" and \"failed multi-step reasoning tasks\" as the failure modes in smaller models. All claims are grounded in the evidence with no additions or contradictions."
         },
         "refined": true
       }
@@ -391,45 +512,61 @@
   },
   {
     "task_id": "task_010",
-    "question_quality_score": 0.6,
+    "question_quality_score": 0.5,
     "answer_confidence": 0.9,
     "detected_issues": [
       "weak_question"
     ],
-    "agent_reasoning_summary": "Initial verdict 'unsupported' (confidence 0.82) triggered refinement. After 1 pass(es) the answer is 'supported' (confidence 0.90). The evidence states \"lipid metabolism and sphingolipid pathways showed significant dysregulation\" without ranking them, so the answer's claim that no strongest pathway is identified is faithful. The question presumes a ranking that the evidence does not provide, lowering question quality.",
+    "agent_reasoning_summary": "Initial verdict 'unsupported' (confidence 0.85) triggered refinement. After 1 pass(es) the answer is 'supported' (confidence 0.90). The evidence states \"lipid metabolism and sphingolipid pathways showed significant dysregulation\" without ranking, and the answer faithfully reports both pathways while correctly noting no \"strongest\" is identified. The question presupposes a ranking the evidence does not provide, lowering its quality.",
     "refinement_applied": true,
-    "final_answer": "The evidence does not rank the pathways or identify which showed the strongest dysregulation. It states only that both lipid metabolism and sphingolipid pathways showed significant dysregulation across patient cohorts.",
+    "final_answer": "The evidence does not rank one pathway as the strongest. It reports that both lipid metabolism and sphingolipid pathways showed significant dysregulation across patient cohorts, without indicating which was most dysregulated.",
     "evidence": [
       "Lipid metabolism and sphingolipid pathways showed significant dysregulation across patient cohorts."
     ],
     "final_verdict": "supported",
+    "rubric_scores": {
+      "faithfulness": 1.0,
+      "completeness": 1.0,
+      "specificity": 0.95
+    },
     "iterations": [
       {
         "step": 0,
         "answer": "Sphingolipid metabolism showed the strongest dysregulation.",
         "verdict": {
           "verdict": "unsupported",
-          "confidence": 0.82,
-          "question_quality_score": 0.9,
+          "confidence": 0.85,
+          "question_quality_score": 0.7,
+          "rubric": {
+            "faithfulness": 0.4,
+            "completeness": 0.5,
+            "specificity": 0.3
+          },
           "detected_issues": [
             "unsupported",
-            "unsupported_claim"
+            "unsupported_claim",
+            "weak_question"
           ],
-          "rationale": "The evidence states both \"Lipid metabolism and sphingolipid pathways showed significant dysregulation\" but does not rank them or single out sphingolipid metabolism as the \"strongest.\" The answer's claim of relative strength is neither confirmed nor denied by the evidence."
+          "rationale": "The evidence states both \"Lipid metabolism and sphingolipid pathways showed significant dysregulation\" but does not rank one as \"strongest.\" The answer's superlative claim that sphingolipid metabolism was strongest is not confirmed or denied by the evidence, and the question presupposes a ranking the evidence never provides."
         },
         "refined": false
       },
       {
         "step": 1,
-        "answer": "The evidence does not rank the pathways or identify which showed the strongest dysregulation. It states only that both lipid metabolism and sphingolipid pathways showed significant dysregulation across patient cohorts.",
+        "answer": "The evidence does not rank one pathway as the strongest. It reports that both lipid metabolism and sphingolipid pathways showed significant dysregulation across patient cohorts, without indicating which was most dysregulated.",
         "verdict": {
           "verdict": "supported",
           "confidence": 0.9,
-          "question_quality_score": 0.6,
+          "question_quality_score": 0.5,
+          "rubric": {
+            "faithfulness": 1.0,
+            "completeness": 1.0,
+            "specificity": 0.95
+          },
           "detected_issues": [
             "weak_question"
           ],
-          "rationale": "The evidence states \"lipid metabolism and sphingolipid pathways showed significant dysregulation\" without ranking them, so the answer's claim that no strongest pathway is identified is faithful. The question presumes a ranking that the evidence does not provide, lowering question quality."
+          "rationale": "The evidence states \"lipid metabolism and sphingolipid pathways showed significant dysregulation\" without ranking, and the answer faithfully reports both pathways while correctly noting no \"strongest\" is identified. The question presupposes a ranking the evidence does not provide, lowering its quality."
         },
         "refined": true
       }

@@ -119,6 +119,18 @@ class Evaluator:
         lines.append(f"- Mean confidence when incorrect: **{report.mean_conf_incorrect:.2f}**")
         lines.append("")
 
+        lines.append("## Rubric (mean axis scores across all tasks)")
+        lines.append("")
+        if self._results:
+            task_count = len(self._results)
+            mean_faithfulness = sum(r.rubric_scores.faithfulness for r in self._results) / task_count
+            mean_completeness = sum(r.rubric_scores.completeness for r in self._results) / task_count
+            mean_specificity = sum(r.rubric_scores.specificity for r in self._results) / task_count
+            lines.append(f"- Faithfulness: **{mean_faithfulness:.2f}**")
+            lines.append(f"- Completeness: **{mean_completeness:.2f}**")
+            lines.append(f"- Specificity: **{mean_specificity:.2f}**")
+        lines.append("")
+
         lines.append("## Confusion (gold -> predicted)")
         lines.append("")
         lines.append("| gold label | predicted | count |")

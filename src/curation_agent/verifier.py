@@ -31,10 +31,20 @@ Assign exactly one verdict:
 
 Also rate question_quality_score: 1.0 for a clear, specific, answerable
 question; lower it for vague, ambiguous, multi-part, or unanswerable questions,
-and add a weak_question tag to detected_issues when the score is low. List
-detected_issues using the verdict names plus optional tags like missing_citation
-or unsupported_claim. Give a one to three sentence rationale grounded in
-specific evidence tokens."""
+and add a weak_question tag to detected_issues when the score is low.
+
+Separately, score three ORTHOGONAL rubric axes from 0.0 to 1.0 — judge each
+independently of the single verdict and of each other:
+- faithfulness: are the answer's claims grounded in, and not contradicting, the
+  evidence? (a contradiction or fabrication drives this down)
+- completeness: does the answer capture the evidence's central finding, rather
+  than a minor or tangential point?
+- specificity: is the answer appropriately precise WITHOUT over-claiming — no
+  unsupported superlatives ("strongest", "most"), hedges, or vagueness?
+
+List detected_issues using the verdict names plus optional tags like
+missing_citation or unsupported_claim. Give a one to three sentence rationale
+grounded in specific evidence tokens."""
 
     SCHEMA = {
         "type": "object",
@@ -45,10 +55,19 @@ specific evidence tokens."""
             },
             "confidence": {"type": "number", "minimum": 0, "maximum": 1},
             "question_quality_score": {"type": "number", "minimum": 0, "maximum": 1},
+            "rubric": {
+                "type": "object",
+                "properties": {
+                    "faithfulness": {"type": "number", "minimum": 0, "maximum": 1},
+                    "completeness": {"type": "number", "minimum": 0, "maximum": 1},
+                    "specificity": {"type": "number", "minimum": 0, "maximum": 1},
+                },
+                "required": ["faithfulness", "completeness", "specificity"],
+            },
             "detected_issues": {"type": "array", "items": {"type": "string"}},
             "rationale": {"type": "string"},
         },
-        "required": ["verdict", "confidence", "question_quality_score", "detected_issues", "rationale"],
+        "required": ["verdict", "confidence", "question_quality_score", "rubric", "detected_issues", "rationale"],
     }
 
     def __init__(self, client: LLMClient) -> None:

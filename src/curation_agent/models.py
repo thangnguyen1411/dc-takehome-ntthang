@@ -28,12 +28,31 @@ class Task(BaseModel):
     ground_truth_signal: Optional[str] = None
 
 
+class RubricScores(BaseModel):
+    """Orthogonal 0-1 quality axes, scored independently of the single verdict.
+
+    The single `verdict` is one mutually-exclusive label; these axes decompose
+    *why* an answer is good or bad along independent dimensions, so a reviewer
+    sees, e.g., "faithful but incomplete" rather than one blurry category.
+    Defaults are 1.0 so a judge (or test double) that omits them reads as clean.
+    """
+
+    # Are the answer's claims grounded in — and not contradicting — the evidence?
+    faithfulness: float = Field(default=1.0, ge=0.0, le=1.0)
+    # Does the answer capture the evidence's central finding (vs a minor point)?
+    completeness: float = Field(default=1.0, ge=0.0, le=1.0)
+    # Is it appropriately precise without over-claiming (no unbacked superlatives)?
+    specificity: float = Field(default=1.0, ge=0.0, le=1.0)
+
+
 class Verdict(BaseModel):
     """Structured judgement of an answer against its evidence."""
 
     verdict: str = Field(description="supported|contradicted|hallucinated|weak_reasoning|unsupported")
     confidence: float = Field(ge=0.0, le=1.0)
     question_quality_score: float = Field(ge=0.0, le=1.0)
+    # Multi-axis rubric scores complementing the single verdict label.
+    rubric: RubricScores = Field(default_factory=RubricScores)
     detected_issues: list[str] = Field(default_factory=list)
     rationale: str = ""
 
@@ -68,6 +87,8 @@ class CurationResult(BaseModel):
     final_answer: str
     evidence: list[str]
     final_verdict: str
+    # Multi-axis rubric scores from the final verdict (decomposed quality view).
+    rubric_scores: RubricScores = Field(default_factory=RubricScores)
     iterations: list[Iteration] = Field(default_factory=list)
     # Populated only by the eval harness, never by the agent.
     ground_truth_signal: Optional[str] = None
