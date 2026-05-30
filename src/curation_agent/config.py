@@ -38,8 +38,10 @@ class Config:
     question_quality_threshold: float = 0.5
     # Below this, a rubric axis (faithfulness/completeness/specificity) is flagged.
     rubric_threshold: float = 0.6
-    # Hard cap on critic -> regenerate -> re-verify cycles per task.
-    max_refine_iterations: int = 2
+    # Hard cap on critic -> regenerate -> re-verify cycles per task. Set to 3 so
+    # the escalating retry prompts (see Refiner.ESCALATION) can actually exercise
+    # their firmer tiers on hard cases.
+    max_refine_iterations: int = 3
     max_tokens: int = 1024
 
     @property
