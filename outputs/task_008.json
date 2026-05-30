@@ -1,0 +1,43 @@
+{
+  "task_id": "task_008",
+  "question_quality_score": 0.85,
+  "answer_confidence": 0.97,
+  "detected_issues": [],
+  "agent_reasoning_summary": "Initial verdict 'contradicted' (confidence 0.96) triggered refinement. After 1 pass(es) the answer is 'supported' (confidence 0.97). The answer faithfully restates the evidence: \"RNA velocity vectors\" indicating a \"differentiation path from progenitor cells toward neuronal lineage commitment.\" No claims exceed the evidence.",
+  "refinement_applied": true,
+  "final_answer": "RNA velocity vectors identified a differentiation trajectory from progenitor cells toward neuronal lineage commitment.",
+  "evidence": [
+    "RNA velocity vectors suggested a differentiation path from progenitor cells toward neuronal lineage commitment."
+  ],
+  "final_verdict": "supported",
+  "iterations": [
+    {
+      "step": 0,
+      "answer": "Cells transitioned from mature neurons back into pluripotent stem cells.",
+      "verdict": {
+        "verdict": "contradicted",
+        "confidence": 0.96,
+        "question_quality_score": 0.85,
+        "detected_issues": [
+          "contradicted"
+        ],
+        "rationale": "The evidence states RNA velocity indicated a path \"from progenitor cells toward neuronal lineage commitment,\" whereas the answer asserts the reverse—mature neurons reverting to pluripotent stem cells—directly opposing both the direction and cell identities described."
+      },
+      "refined": false
+    },
+    {
+      "step": 1,
+      "answer": "RNA velocity vectors identified a differentiation trajectory from progenitor cells toward neuronal lineage commitment.",
+      "verdict": {
+        "verdict": "supported",
+        "confidence": 0.97,
+        "question_quality_score": 0.85,
+        "detected_issues": [],
+        "rationale": "The answer faithfully restates the evidence: \"RNA velocity vectors\" indicating a \"differentiation path from progenitor cells toward neuronal lineage commitment.\" No claims exceed the evidence."
+      },
+      "refined": true
+    }
+  ],
+  "ground_truth_signal": "hallucinated",
+  "verdict_matches_ground_truth": false
+}

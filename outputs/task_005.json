@@ -1,0 +1,48 @@
+{
+  "task_id": "task_005",
+  "question_quality_score": 0.7,
+  "answer_confidence": 0.9,
+  "detected_issues": [
+    "weak_question"
+  ],
+  "agent_reasoning_summary": "Initial verdict 'weak_reasoning' (confidence 0.78) triggered refinement. After 1 pass(es) the answer is 'supported' (confidence 0.90). The evidence cites two features (\"high interferon-gamma signaling\" and \"elevated CD8 infiltration\") that \"correlated strongly\" without ranking them, and the answer faithfully reports this while correctly noting no single most-predictive feature is identified. The question presupposes a single \"most predictive\" feature that the evidence does not actually single out, lowering its quality.",
+  "refinement_applied": true,
+  "final_answer": "The evidence does not identify a single most predictive feature. Rather, two features both correlated strongly with immunotherapy response: high interferon-gamma signaling and elevated CD8 infiltration. The evidence does not rank one above the other.",
+  "evidence": [
+    "High interferon-gamma signaling and elevated CD8 infiltration correlated strongly with treatment response."
+  ],
+  "final_verdict": "supported",
+  "iterations": [
+    {
+      "step": 0,
+      "answer": "Interferon-gamma signaling was the most predictive feature.",
+      "verdict": {
+        "verdict": "weak_reasoning",
+        "confidence": 0.78,
+        "question_quality_score": 0.85,
+        "detected_issues": [
+          "weak_reasoning",
+          "unsupported_claim"
+        ],
+        "rationale": "The evidence lists two features (\"interferon-gamma signaling\" and \"CD8 infiltration\") that both \"correlated strongly\" with response, but it never ranks one as \"most predictive.\" The answer singles out interferon-gamma as the top feature, an unsupported claim that overstates and misattributes the relative importance the evidence does not establish."
+      },
+      "refined": false
+    },
+    {
+      "step": 1,
+      "answer": "The evidence does not identify a single most predictive feature. Rather, two features both correlated strongly with immunotherapy response: high interferon-gamma signaling and elevated CD8 infiltration. The evidence does not rank one above the other.",
+      "verdict": {
+        "verdict": "supported",
+        "confidence": 0.9,
+        "question_quality_score": 0.7,
+        "detected_issues": [
+          "weak_question"
+        ],
+        "rationale": "The evidence cites two features (\"high interferon-gamma signaling\" and \"elevated CD8 infiltration\") that \"correlated strongly\" without ranking them, and the answer faithfully reports this while correctly noting no single most-predictive feature is identified. The question presupposes a single \"most predictive\" feature that the evidence does not actually single out, lowering its quality."
+      },
+      "refined": true
+    }
+  ],
+  "ground_truth_signal": "supported",
+  "verdict_matches_ground_truth": false
+}
