@@ -66,6 +66,23 @@ class Verdict(BaseModel):
         return value
 
 
+class ReflectionPlan(BaseModel):
+    """The Reflector's fix plan for one retry — reasoning *about* the failure,
+    produced as a distinct step between judging (verify) and acting (regenerate).
+
+    Separating "decide how to fix" from "write the fix" makes the correction
+    strategy explicit and auditable rather than buried in the rewrite prompt.
+
+    All fields default to empty so a model that returns a partial plan (e.g.
+    omits `what_to_change`) degrades to a usable plan instead of crashing the
+    task — the regenerator falls back to the failure rationale in that case.
+    """
+
+    diagnosis: str = ""        # what specifically went wrong in the prior answer(s)
+    what_to_change: str = ""   # the concrete corrective approach for the rewrite
+    what_to_keep: str = ""     # parts already correct, to preserve
+
+
 class Iteration(BaseModel):
     """A single step of the self-improvement loop."""
 
@@ -73,6 +90,9 @@ class Iteration(BaseModel):
     answer: str
     verdict: Verdict
     refined: bool = False
+    # The reflection plan that *led to* this answer (None for the initial pass,
+    # which is the original candidate and was not reflected upon).
+    reflection: Optional[ReflectionPlan] = None
 
 
 class CurationResult(BaseModel):

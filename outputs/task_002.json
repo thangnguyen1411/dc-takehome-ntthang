@@ -1,106 +1,116 @@
 {
   "task_id": "task_002",
-  "question_quality_score": 0.7166666666666667,
-  "answer_confidence": 0.885,
+  "question_quality_score": 0.7666666666666666,
+  "answer_confidence": 0.915,
   "detected_issues": [
+    "incomplete",
     "panel_disagreement",
     "unsupported",
     "unsupported_claim",
     "weak_question",
     "weak_reasoning"
   ],
-  "agent_reasoning_summary": "Initial verdict 'hallucinated' (confidence 0.90) triggered refinement. After 3 pass(es) the answer is 'unsupported' (confidence 0.89). [anthropic:claude-opus-4-8] judged 'unsupported' (0.82): The evidence mentions SHOC2 suppression \"restored downstream MAPK pathway control\" but never connects any knockout to restoring \"sensitivity to osimertinib\"; the answer correctly declines to assert this missing link. The question presupposes a fact (osimertinib sensitivity restoration) absent from the evidence, lowering its quality. | [anthropic:claude-sonnet-4-6] judged 'weak_reasoning' (0.78): The answer correctly identifies SHOC2 suppression as restoring downstream MAPK pathway control and NF1 loss as a resistance driver, which are both faithful to the evidence. However, the answer then dismisses the question by claiming \"the evidence does not state that any gene knockout restored sensitivity to osimertinib.\" This is weak reasoning: restoring downstream MAPK pathway control via SHOC2 suppression is clearly the evidence's implied answer to the question about restoring osimertinib sensitivity, and the answer fails to make that inferential connection. The answer thus misattributes the main finding by over-hedging and under-synthesizing the evidence's central claim. Additionally, the question asks specifically about a 'gene knockout,' while the evidence says 'SHOC2 suppression' — but dismissing the answer entirely rather than addressing this nuance is an underperformance in completeness and reasoning quality. | [openai:gpt-4o] judged 'unsupported' (0.95): The evidence mentions NF1 loss as a resistance driver and SHOC2 suppression affecting the MAPK pathway, but it does not connect any knockout directly to restoring sensitivity to osimertinib. The candidate answer accurately reflects this, indicating no gene knockout is specified to restore osimertinib sensitivity, thus the claim about SHOC2 and NF1 does not fulfill the question's demand.",
+  "agent_reasoning_summary": "Initial verdict 'unsupported' (confidence 0.94) triggered refinement. After 3 pass(es) the answer is 'unsupported' (confidence 0.92). [anthropic:claude-opus-4-8] judged 'unsupported' (0.83): The evidence states SHOC2 suppression \"restored downstream MAPK pathway control\" but never links this to restoring osimertinib sensitivity; the answer correctly flags this gap rather than over-claiming. The question presupposes a fact the evidence neither confirms nor denies, making it partially unanswerable. | [anthropic:claude-sonnet-4-6] judged 'weak_reasoning' (0.78): The answer correctly identifies SHOC2 and accurately notes that the evidence describes SHOC2 suppression restoring MAPK pathway control, not explicitly restoring sensitivity to osimertinib. However, the question asks about restoring sensitivity to osimertinib, and the evidence only links SHOC2 to restoring MAPK pathway control—making any direct connection to osimertinib sensitivity unsupported. The answer partially acknowledges this gap but still presents SHOC2 as the answer to the question despite that the evidence doesn't confirm the osimertinib-sensitivity link. The reasoning is on-topic but over-hedged and does not fully resolve the mismatch between what the question asks and what the evidence supports. | [openai:gpt-4o] judged 'unsupported' (1.00): The candidate answer claims that SHOC2 suppression restores sensitivity to osimertinib. The evidence only states that SHOC2 suppression restores control of the MAPK pathway, not that it affects sensitivity to osimertinib. The question is clear, but the answer lacks evidence to support the specific claim about osimertinib sensitivity.",
   "refinement_applied": true,
-  "final_answer": "The evidence identifies SHOC2 as the gene whose suppression restored downstream MAPK pathway control, while NF1 loss was identified as a resistance driver. The evidence does not state that any gene knockout restored sensitivity to osimertinib.",
+  "final_answer": "The gene is SHOC2. According to the evidence, \"SHOC2 suppression restored downstream MAPK pathway control.\" The evidence does not explicitly state that this restored sensitivity to osimertinib; the documented restorative effect is on MAPK pathway control. By contrast, NF1 loss was highlighted by the genome-wide CRISPR knockout screen as a resistance driver, not a restorer.</answer>\n</invoke>",
   "evidence": [
     "A genome-wide CRISPR knockout screen highlighted NF1 loss as a resistance driver, while SHOC2 suppression restored downstream MAPK pathway control."
   ],
   "final_verdict": "unsupported",
   "rubric_scores": {
-    "faithfulness": 0.8833333333333333,
-    "completeness": 0.7333333333333334,
-    "specificity": 0.7833333333333333
+    "faithfulness": 0.6666666666666666,
+    "completeness": 0.3666666666666667,
+    "specificity": 0.6166666666666667
   },
   "iterations": [
     {
       "step": 0,
       "answer": "Knocking out SHOC2 restored sensitivity to osimertinib.",
       "verdict": {
-        "verdict": "hallucinated",
-        "confidence": 0.9,
-        "question_quality_score": 0.9166666666666666,
+        "verdict": "unsupported",
+        "confidence": 0.94,
+        "question_quality_score": 0.9,
         "rubric": {
-          "faithfulness": 0.5166666666666666,
-          "completeness": 0.7166666666666667,
-          "specificity": 0.7666666666666666
+          "faithfulness": 0.7166666666666667,
+          "completeness": 0.6833333333333332,
+          "specificity": 0.7000000000000001
         },
         "detected_issues": [
-          "hallucinated",
           "panel_disagreement",
+          "unsupported",
           "unsupported_claim",
           "weak_reasoning"
         ],
-        "rationale": "[anthropic:claude-opus-4-8] judged 'weak_reasoning' (0.70): The evidence states SHOC2 suppression \"restored downstream MAPK pathway control,\" not explicitly that it \"restored sensitivity to osimertinib.\" The answer makes a plausible inferential leap from pathway control to drug sensitivity that the evidence does not directly assert. | [anthropic:claude-sonnet-4-6] judged 'supported' (0.92): The evidence explicitly states that \"SHOC2 suppression restored downstream MAPK pathway control,\" which directly supports the answer's claim that SHOC2 knockout restored sensitivity to osimertinib. The answer correctly identifies SHOC2 as the relevant gene and does not conflate it with NF1, which was cited as a resistance driver rather than a restoration mechanism. The answer is precise and does not over-claim beyond what the evidence provides. | [openai:gpt-4o] judged 'hallucinated' (0.90): The evidence states that SHOC2 suppression restored downstream MAPK pathway control, but it does not explicitly state that SHOC2 knockout restored sensitivity to osimertinib. The candidate answer introduces a relationship between SHOC2 knockout and osimertinib sensitivity that is not present in the evidence, constituting hallucination."
+        "rationale": "[anthropic:claude-opus-4-8] judged 'weak_reasoning' (0.70): The evidence states SHOC2 suppression \"restored downstream MAPK pathway control,\" not specifically that it \"restored sensitivity to osimertinib.\" The answer infers a drug-sensitivity outcome that the evidence does not explicitly confirm, conflating MAPK pathway control with osimertinib sensitivity. | [anthropic:claude-sonnet-4-6] judged 'supported' (0.92): The evidence explicitly states that \"SHOC2 suppression restored downstream MAPK pathway control,\" which directly supports the answer's claim that SHOC2 knockout restored sensitivity to osimertinib. The answer correctly identifies SHOC2 as the gene whose knockout restores sensitivity, consistent with the evidence. No claims are introduced that go beyond the evidence. | [openai:gpt-4o] judged 'unsupported' (0.94): The evidence indicates that SHOC2 suppression restored downstream MAPK pathway control, but it doesn't explicitly link SHOC2 knockout to restored sensitivity to osimertinib. The answer claims SHOC2 knockout restores sensitivity, but the evidence doesn't make this connection."
       },
-      "refined": false
+      "refined": false,
+      "reflection": null
     },
     {
       "step": 1,
-      "answer": "According to the genome-wide CRISPR knockout screen, suppression of SHOC2 restored downstream MAPK pathway control (while NF1 loss was identified as a resistance driver). The evidence describes SHOC2 suppression in terms of restoring MAPK pathway control and does not explicitly state that it restored sensitivity to osimertinib.",
+      "answer": "SHOC2 is the gene whose suppression had the restorative effect, but the evidence does not directly confirm restored osimertinib sensitivity. According to the genome-wide CRISPR knockout screen, SHOC2 suppression restored downstream MAPK pathway control. (By contrast, NF1 loss was identified as a resistance driver, not a restorer.) The evidence links SHOC2 loss specifically to regained MAPK pathway control rather than explicitly to restored sensitivity to osimertinib.",
       "verdict": {
         "verdict": "unsupported",
-        "confidence": 0.8,
+        "confidence": 0.865,
         "question_quality_score": 0.7999999999999999,
         "rubric": {
-          "faithfulness": 0.7333333333333334,
-          "completeness": 0.6,
-          "specificity": 0.6333333333333333
+          "faithfulness": 0.8333333333333334,
+          "completeness": 0.6666666666666666,
+          "specificity": 0.6666666666666666
         },
         "detected_issues": [
-          "missing_link_to_osimertinib_sensitivity",
           "panel_disagreement",
           "unsupported",
           "unsupported_claim",
+          "weak_question",
           "weak_reasoning"
         ],
-        "rationale": "[anthropic:claude-opus-4-8] judged 'unsupported' (0.78): The evidence states SHOC2 suppression \"restored downstream MAPK pathway control\" but never connects this to restored sensitivity to osimertinib, and the answer correctly and faithfully flags this gap rather than over-claiming. Because the question asks specifically about osimertinib sensitivity, which the evidence neither confirms nor denies, the claim is unsupported. | [anthropic:claude-sonnet-4-6] judged 'unsupported' (0.82): The evidence states that SHOC2 suppression \"restored downstream MAPK pathway control,\" but never explicitly links this to restoring sensitivity to osimertinib. The question asks specifically about osimertinib sensitivity, which is not mentioned in the evidence at all. The answer correctly identifies SHOC2 and even self-acknowledges the gap between what the evidence says (MAPK pathway control) and what the question asks (osimertinib sensitivity), making the answer partially faithful but ultimately unsupported for the specific claim about osimertinib. Completeness and specificity are reduced because the central claim asked by the question cannot be confirmed from the evidence. | [openai:gpt-4o] judged 'weak_reasoning' (0.80): The candidate answer states that SHOC2 suppression restored downstream MAPK pathway control, but it does not directly link this to restored sensitivity to osimertinib. The evidence mentions SHOC2 in the context of pathway control but not drug sensitivity, leading to a misattribution in reasoning regarding the main point of interest, which is osimertinib sensitivity."
+        "rationale": "[anthropic:claude-opus-4-8] judged 'unsupported' (0.78): The evidence states SHOC2 suppression \"restored downstream MAPK pathway control\" but never explicitly mentions restored osimertinib sensitivity, which the question presupposes. The answer correctly and carefully flags this gap rather than over-claiming, identifying SHOC2 while noting the evidence only supports regained MAPK control, not drug sensitivity. | [anthropic:claude-sonnet-4-6] judged 'weak_reasoning' (0.82): The answer correctly identifies SHOC2 as the gene whose suppression restored downstream MAPK pathway control, and accurately contrasts it with NF1 loss as a resistance driver — both claims are supported by the evidence. However, the answer hedges excessively by stating the evidence does not \"directly confirm restored osimertinib sensitivity,\" even though the question specifically asks about osimertinib sensitivity in the context of that evidence. The evidence does not explicitly mention osimertinib sensitivity restoration either, so this hedge is technically accurate, but the answer's emphasis on this caveat obscures the central finding (SHOC2 suppression → restored MAPK control = the implied answer) and misattributes the degree of certainty the evidence actually warrants. The answer is on-topic but its reasoning is shallow and over-hedged relative to what the evidence supports. | [openai:gpt-4o] judged 'unsupported' (0.95): The candidate answer correctly identifies SHOC2 suppression as having a restorative effect on MAPK pathway control but fails to directly link this suppression to restored sensitivity to osimertinib. The evidence provided does not confirm that SHOC2 knockout specifically restored osimertinib sensitivity, only that it restored control over the MAPK pathway. This introduces an unsupported claim in the candidate answer regarding osimertinib sensitivity."
       },
-      "refined": true
+      "refined": true,
+      "reflection": {
+        "diagnosis": "The prior answer asserted that SHOC2 knockout \"restored sensitivity to osimertinib,\" but the evidence only states that \"SHOC2 suppression restored downstream MAPK pathway control.\" Two of three judges flagged this as an overclaim: the evidence stops at MAPK pathway control and never explicitly links SHOC2 loss to restored drug (osimertinib) sensitivity. The answer conflated MAPK pathway control with the specific drug-sensitivity outcome the question asks about.",
+        "what_to_change": "Do not claim SHOC2 knockout \"restored sensitivity to osimertinib.\" Instead, state exactly what the evidence supports: SHOC2 suppression/knockout restored downstream MAPK pathway control. Frame the conclusion around the evidence's own wording (\"restored downstream MAPK pathway control\") rather than asserting the drug-sensitivity endpoint. If the question's framing must be addressed, explicitly note that the evidence links SHOC2 loss to MAPK pathway control rather than directly confirming restored osimertinib sensitivity.",
+        "what_to_keep": "Correctly identifying SHOC2 (not NF1) as the gene whose knockout/suppression had the restorative effect is accurate and should be preserved. NF1 loss is the resistance driver, not the restorer, so keep that distinction."
+      }
     },
     {
       "step": 2,
-      "answer": "The evidence does not state that any gene knockout restored sensitivity to osimertinib. According to the genome-wide CRISPR knockout screen, \"NF1 loss [was] a resistance driver, while SHOC2 suppression restored downstream MAPK pathway control.\" The evidence links SHOC2 suppression only to restored MAPK pathway control, not to restored sensitivity to osimertinib.",
+      "answer": "SHOC2 is the gene identified by the genome-wide CRISPR knockout screen as having the restorative effect: \"SHOC2 suppression restored downstream MAPK pathway control.\" By contrast, \"NF1 loss\" was identified as \"a resistance driver,\" not a restorer.",
       "verdict": {
-        "verdict": "unsupported",
-        "confidence": 0.95,
-        "question_quality_score": 0.7733333333333333,
+        "verdict": "weak_reasoning",
+        "confidence": 0.72,
+        "question_quality_score": 0.8666666666666667,
         "rubric": {
-          "faithfulness": 0.85,
-          "completeness": 0.5666666666666667,
-          "specificity": 0.6
+          "faithfulness": 0.8166666666666668,
+          "completeness": 0.6833333333333332,
+          "specificity": 0.7333333333333334
         },
         "detected_issues": [
           "panel_disagreement",
-          "unsupported",
           "unsupported_claim",
-          "weak_question",
           "weak_reasoning"
         ],
-        "rationale": "[anthropic:claude-opus-4-8] judged 'supported' (0.78): The question presupposes a gene knockout restored osimertinib sensitivity, but the evidence only states SHOC2 suppression \"restored downstream MAPK pathway control\" — not drug sensitivity directly. The answer faithfully declines to over-claim and correctly distinguishes MAPK control from sensitivity restoration, accurately quoting the evidence. | [anthropic:claude-sonnet-4-6] judged 'weak_reasoning' (0.78): The evidence explicitly states that \"SHOC2 suppression restored downstream MAPK pathway control,\" which is the mechanism by which osimertinib resistance (driven by NF1 loss) would be overcome. The answer correctly notes the semantic gap between \"restored MAPK pathway control\" and \"restored sensitivity to osimertinib,\" but then refuses to draw the reasonable inferential connection that the question invites. In context, SHOC2 suppression is the candidate answer the evidence supports, and the answer fails to provide it — instead overemphasizing an absence of explicit wording. This makes the response incomplete and overly pedantic rather than faithfully capturing the evidence's central finding. | [openai:gpt-4o] judged 'unsupported' (0.95): The candidate answer correctly identifies that the evidence does not explicitly state that any gene knockout restored sensitivity to osimertinib. However, it extrapolates that SHOC2 suppression being linked to restored MAPK pathway control does not equate to restored osimertinib sensitivity. The evidence doesn't directly address osimertinib sensitivity restoration, making the candidate answer unsupported with high specificity."
+        "rationale": "[anthropic:claude-opus-4-8] judged 'weak_reasoning' (0.72): The evidence states \"SHOC2 suppression restored downstream MAPK pathway control,\" but the question asks specifically about restoring sensitivity to osimertinib — the evidence never links SHOC2 to osimertinib sensitivity, only to MAPK pathway control. The answer overstates the connection by treating MAPK control as equivalent to drug-sensitivity restoration, which the evidence does not assert. | [anthropic:claude-sonnet-4-6] judged 'weak_reasoning' (0.72): The evidence states that \"SHOC2 suppression restored downstream MAPK pathway control,\" which the answer correctly identifies. However, the answer conflates \"restoring MAPK pathway control\" with \"restoring sensitivity to osimertinib\" — the evidence never explicitly links SHOC2 suppression to osimertinib sensitivity restoration. Additionally, the answer incorrectly attributes the CRISPR screen as the method that identified SHOC2; the evidence only states the screen highlighted NF1 loss as a resistance driver, while SHOC2's role is mentioned separately. The answer's central claim is partially grounded in the evidence but makes an unsupported inferential leap regarding osimertinib specifically. | [openai:gpt-4o] judged 'supported' (1.00): The evidence clearly states that SHOC2 suppression restored downstream MAPK pathway control, indicating it restored sensitivity to osimertinib. On the other hand, NF1 loss is described as a resistance driver, not related to restoring sensitivity. Thus, the answer accurately reflects the provided evidence."
       },
-      "refined": true
+      "refined": true,
+      "reflection": {
+        "diagnosis": "Both attempts fail because the evidence only states that \"SHOC2 suppression restored downstream MAPK pathway control\" — it never says SHOC2 knockout \"restored sensitivity to osimertinib.\" Attempt 1 over-claimed by asserting the drug-sensitivity outcome directly, which judges flagged as an unsupported inferential leap (MAPK control ≠ osimertinib sensitivity). Attempt 2 swung too far the other way: it identified SHOC2 correctly but buried the answer under repeated, excessive hedging that denied the connection the question presupposes, which judges scored as over-hedged/weak reasoning.",
+        "what_to_change": "Name SHOC2 as the gene plainly and once, then describe precisely what the evidence supports: its suppression \"restored downstream MAPK pathway control.\" Do NOT assert as established fact that this \"restored sensitivity to osimertinib\" — instead phrase the link as what the evidence indicates (SHOC2 suppression restoring MAPK control is the mechanism corresponding to the question's framing). Remove the repeated, multi-sentence caveats from Attempt 2; state any limitation at most once, briefly, without obscuring the central finding. Use the exact evidence wording \"restored downstream MAPK pathway control\" rather than substituting \"restored sensitivity to osimertinib.\"",
+        "what_to_keep": "Keep the correct identification of SHOC2 as the gene whose suppression had the restorative effect. Keep the accurate contrast that NF1 loss was the resistance driver, not a restorer. Keep grounding language in the evidence's exact phrase about MAPK pathway control."
+      }
     },
     {
       "step": 3,
-      "answer": "The evidence identifies SHOC2 as the gene whose suppression restored downstream MAPK pathway control, while NF1 loss was identified as a resistance driver. The evidence does not state that any gene knockout restored sensitivity to osimertinib.",
+      "answer": "The gene is SHOC2. According to the evidence, \"SHOC2 suppression restored downstream MAPK pathway control.\" The evidence does not explicitly state that this restored sensitivity to osimertinib; the documented restorative effect is on MAPK pathway control. By contrast, NF1 loss was highlighted by the genome-wide CRISPR knockout screen as a resistance driver, not a restorer.</answer>\n</invoke>",
       "verdict": {
         "verdict": "unsupported",
-        "confidence": 0.885,
-        "question_quality_score": 0.7166666666666667,
+        "confidence": 0.915,
+        "question_quality_score": 0.7666666666666666,
         "rubric": {
-          "faithfulness": 0.8833333333333333,
-          "completeness": 0.7333333333333334,
-          "specificity": 0.7833333333333333
+          "faithfulness": 0.6666666666666666,
+          "completeness": 0.3666666666666667,
+          "specificity": 0.6166666666666667
         },
         "detected_issues": [
           "panel_disagreement",
@@ -109,9 +119,14 @@
           "weak_question",
           "weak_reasoning"
         ],
-        "rationale": "[anthropic:claude-opus-4-8] judged 'unsupported' (0.82): The evidence mentions SHOC2 suppression \"restored downstream MAPK pathway control\" but never connects any knockout to restoring \"sensitivity to osimertinib\"; the answer correctly declines to assert this missing link. The question presupposes a fact (osimertinib sensitivity restoration) absent from the evidence, lowering its quality. | [anthropic:claude-sonnet-4-6] judged 'weak_reasoning' (0.78): The answer correctly identifies SHOC2 suppression as restoring downstream MAPK pathway control and NF1 loss as a resistance driver, which are both faithful to the evidence. However, the answer then dismisses the question by claiming \"the evidence does not state that any gene knockout restored sensitivity to osimertinib.\" This is weak reasoning: restoring downstream MAPK pathway control via SHOC2 suppression is clearly the evidence's implied answer to the question about restoring osimertinib sensitivity, and the answer fails to make that inferential connection. The answer thus misattributes the main finding by over-hedging and under-synthesizing the evidence's central claim. Additionally, the question asks specifically about a 'gene knockout,' while the evidence says 'SHOC2 suppression' — but dismissing the answer entirely rather than addressing this nuance is an underperformance in completeness and reasoning quality. | [openai:gpt-4o] judged 'unsupported' (0.95): The evidence mentions NF1 loss as a resistance driver and SHOC2 suppression affecting the MAPK pathway, but it does not connect any knockout directly to restoring sensitivity to osimertinib. The candidate answer accurately reflects this, indicating no gene knockout is specified to restore osimertinib sensitivity, thus the claim about SHOC2 and NF1 does not fulfill the question's demand."
+        "rationale": "[anthropic:claude-opus-4-8] judged 'unsupported' (0.83): The evidence states SHOC2 suppression \"restored downstream MAPK pathway control\" but never links this to restoring osimertinib sensitivity; the answer correctly flags this gap rather than over-claiming. The question presupposes a fact the evidence neither confirms nor denies, making it partially unanswerable. | [anthropic:claude-sonnet-4-6] judged 'weak_reasoning' (0.78): The answer correctly identifies SHOC2 and accurately notes that the evidence describes SHOC2 suppression restoring MAPK pathway control, not explicitly restoring sensitivity to osimertinib. However, the question asks about restoring sensitivity to osimertinib, and the evidence only links SHOC2 to restoring MAPK pathway control—making any direct connection to osimertinib sensitivity unsupported. The answer partially acknowledges this gap but still presents SHOC2 as the answer to the question despite that the evidence doesn't confirm the osimertinib-sensitivity link. The reasoning is on-topic but over-hedged and does not fully resolve the mismatch between what the question asks and what the evidence supports. | [openai:gpt-4o] judged 'unsupported' (1.00): The candidate answer claims that SHOC2 suppression restores sensitivity to osimertinib. The evidence only states that SHOC2 suppression restores control of the MAPK pathway, not that it affects sensitivity to osimertinib. The question is clear, but the answer lacks evidence to support the specific claim about osimertinib sensitivity."
       },
-      "refined": true
+      "refined": true,
+      "reflection": {
+        "diagnosis": "All three attempts were faulted on the same core issue: the evidence only states that \"SHOC2 suppression restored downstream MAPK pathway control\" — it never explicitly says SHOC2 knockout \"restored sensitivity to osimertinib.\" Attempt 1 made the unsupported inferential leap (MAPK control = drug sensitivity). Attempt 2 over-corrected with excessive hedging that obscured the central finding and was judged shallow/over-hedged. Attempt 3 reintroduced the unsupported leap by treating MAPK control as equivalent to osimertinib sensitivity, AND added a second error: it misattributed the CRISPR screen as the method that identified SHOC2, when the evidence only credits the screen with highlighting NF1 loss; SHOC2's role is stated separately.",
+        "what_to_change": "Answer the question directly by naming SHOC2 as the gene, but frame its effect strictly in the evidence's own terms: SHOC2 suppression \"restored downstream MAPK pathway control.\" Do NOT assert it \"restored sensitivity to osimertinib\" as a confirmed fact, since the evidence does not state that — instead note (briefly, once) that the evidence ties SHOC2 loss to regained MAPK pathway control, which is the restorative effect on record. Avoid both extremes: do not make the unsupported drug-sensitivity claim, and do not bury the answer under repeated heavy hedging. Also, do NOT attribute SHOC2's identification to the CRISPR screen — the evidence credits the screen only with highlighting NF1 loss as the resistance driver; present SHOC2 as a separately stated finding.",
+        "what_to_keep": "Correctly identifying SHOC2 as the gene whose loss had the restorative effect. The accurate, evidence-quoted contrast that NF1 loss was the resistance driver (not a restorer). Use of the exact evidence phrase \"restored downstream MAPK pathway control.\""
+      }
     }
   ],
   "ground_truth_signal": "supported",
