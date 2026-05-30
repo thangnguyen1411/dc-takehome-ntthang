@@ -5,7 +5,7 @@
   "detected_issues": [
     "missing_citation"
   ],
-  "agent_reasoning_summary": "Answer judged 'supported' (confidence 0.82). The evidence reports increased PDCD1, LAG3, and TIGIT in infiltrating T cells \"particularly within the CD8-positive population,\" directly supporting the answer's claim that CD8 T cells expressing PDCD1 and LAG3 showed the exhaustion signature. The answer omits TIGIT but this does not contradict the evidence; the \"strongest\" framing is consistent with the \"particularly\" emphasis on CD8 cells.",
+  "agent_reasoning_summary": "Answer judged 'supported' (confidence 0.82). The evidence states exhaustion markers PDCD1, LAG3, and TIGIT were elevated in infiltrating T cells \"particularly within the CD8-positive population,\" directly supporting the answer's claim about CD8 T cells expressing PDCD1 and LAG3. The answer omits TIGIT but this is a minor incompleteness, and the \"strongest\" framing aligns with the evidence's \"particularly.\"",
   "refinement_applied": false,
   "final_answer": "The strongest exhaustion signature was observed in CD8 T cells expressing PDCD1 and LAG3.",
   "evidence": [
@@ -13,7 +13,7 @@
   ],
   "final_verdict": "supported",
   "rubric_scores": {
-    "faithfulness": 0.95,
+    "faithfulness": 0.9,
     "completeness": 0.85,
     "specificity": 0.8
   },
@@ -26,14 +26,14 @@
         "confidence": 0.82,
         "question_quality_score": 0.9,
         "rubric": {
-          "faithfulness": 0.95,
+          "faithfulness": 0.9,
           "completeness": 0.85,
           "specificity": 0.8
         },
         "detected_issues": [
           "missing_citation"
         ],
-        "rationale": "The evidence reports increased PDCD1, LAG3, and TIGIT in infiltrating T cells \"particularly within the CD8-positive population,\" directly supporting the answer's claim that CD8 T cells expressing PDCD1 and LAG3 showed the exhaustion signature. The answer omits TIGIT but this does not contradict the evidence; the \"strongest\" framing is consistent with the \"particularly\" emphasis on CD8 cells."
+        "rationale": "The evidence states exhaustion markers PDCD1, LAG3, and TIGIT were elevated in infiltrating T cells \"particularly within the CD8-positive population,\" directly supporting the answer's claim about CD8 T cells expressing PDCD1 and LAG3. The answer omits TIGIT but this is a minor incompleteness, and the \"strongest\" framing aligns with the evidence's \"particularly.\""
       },
       "refined": false
     }

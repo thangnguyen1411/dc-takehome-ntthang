@@ -10,9 +10,9 @@
 
 ## Rubric (mean axis scores across all tasks)
 
-- Faithfulness: **0.98**
-- Completeness: **0.96**
-- Specificity: **0.89**
+- Faithfulness: **0.97**
+- Completeness: **0.95**
+- Specificity: **0.90**
 
 ## Confusion (gold -> predicted)
 
@@ -30,12 +30,12 @@
 | task | gold | predicted | match | conf | refined |
 |---|---|---|---|---|---|
 | task_001 | supported | supported | ✓ | 0.82 | no |
-| task_002 | supported | weak_reasoning | ✗ | 0.82 | yes |
-| task_003 | contradicted | contradicted | ✓ | 0.82 | yes |
-| task_004 | contradicted | contradicted | ✓ | 0.96 | yes |
-| task_005 | supported | weak_reasoning | ✗ | 0.85 | yes |
-| task_006 | contradicted | contradicted | ✓ | 0.97 | yes |
+| task_002 | supported | weak_reasoning | ✗ | 0.84 | yes |
+| task_003 | contradicted | contradicted | ✓ | 0.86 | yes |
+| task_004 | contradicted | contradicted | ✓ | 0.95 | yes |
+| task_005 | supported | weak_reasoning | ✗ | 0.90 | yes |
+| task_006 | contradicted | contradicted | ✓ | 0.98 | yes |
 | task_007 | supported | supported | ✓ | 0.82 | no |
-| task_008 | hallucinated | contradicted | ✗ | 0.97 | yes |
-| task_009 | weak_reasoning | contradicted | ✗ | 0.98 | yes |
+| task_008 | hallucinated | contradicted | ✗ | 0.95 | yes |
+| task_009 | weak_reasoning | contradicted | ✗ | 0.97 | yes |
 | task_010 | supported | unsupported | ✗ | 0.90 | yes |
