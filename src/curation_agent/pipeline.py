@@ -11,6 +11,7 @@ from .checks import DeterministicChecker
 from .config import Config
 from .llm import LLMClient, make_client
 from .models import CurationResult, Iteration, RubricScores, Task
+from .reflector import Reflector
 from .refiner import Refiner
 from .verifier import AnswerVerifier, PanelVerifier, Verifier
 
@@ -26,12 +27,14 @@ class Pipeline:
     def build(cls, client: LLMClient, config: Config) -> "Pipeline":
         """Composition root: assemble the verifier -> refiner -> pipeline graph.
 
-        `client` is the primary Anthropic client, always used for regeneration.
-        Verification uses a single `Verifier` over that same client by default, or
-        a cross-checking `PanelVerifier` when `config.verifier_panel` is set.
+        `client` is the primary Anthropic client, used for reflection and
+        regeneration. Verification uses a single `Verifier` over that same client
+        by default, or a cross-checking `PanelVerifier` when
+        `config.verifier_panel` is set.
         """
         verifier = cls._build_verifier(client, config)
-        refiner = Refiner(client, verifier, config)
+        reflector = Reflector(client)
+        refiner = Refiner(client, verifier, reflector, config)
         return cls(refiner, config)
 
     @staticmethod

@@ -9,16 +9,17 @@ from __future__ import annotations
 
 from .config import BAD_VERDICTS, Config
 from .llm import LLMClient
-from .models import Iteration, Task, Verdict
+from .models import Iteration, ReflectionPlan, Task, Verdict
+from .reflector import Reflector
 from .verifier import AnswerVerifier
 
 
 class Refiner:
-    """Runs the critic -> regenerate -> re-verify loop over a single task.
+    """Runs the critic -> reflect -> regenerate -> re-verify loop over a task.
 
-    Depends on an `AnswerVerifier` (a single `Verifier` or a `PanelVerifier`) to
-    judge, and the raw `LLMClient` to regenerate, with thresholds and the
-    iteration cap read from `Config`.
+    Depends on an `AnswerVerifier` (single `Verifier` or `PanelVerifier`) to
+    judge, a `Reflector` to plan each fix, and the raw `LLMClient` to regenerate,
+    with thresholds and the iteration cap read from `Config`.
     """
 
     SYSTEM = """You rewrite a scientific answer so it is fully faithful to the
@@ -32,9 +33,16 @@ claims the evidence does not support. Return only the corrected answer."""
         "required": ["answer"],
     }
 
-    def __init__(self, client: LLMClient, verifier: AnswerVerifier, config: Config) -> None:
+    def __init__(
+        self,
+        client: LLMClient,
+        verifier: AnswerVerifier,
+        reflector: Reflector,
+        config: Config,
+    ) -> None:
         self._client = client
         self._verifier = verifier
+        self._reflector = reflector
         self._config = config
 
     # Per-attempt guidance, escalating in strictness. Each retry's prompt is
@@ -63,20 +71,32 @@ claims the evidence does not support. Return only the corrected answer."""
         step = 0
         while self._needs_refinement(latest_verdict) and step < self._config.max_refine_iterations:
             step += 1
-            # Pass the whole failure history so a retry learns from every prior
-            # attempt, not just the most recent one.
-            current_answer = self._regenerate_answer(task, iterations, step)
+            # Reflect (plan the fix) -> regenerate (execute) -> re-verify. The
+            # reflector and regenerator both see the whole failure history, so a
+            # retry learns from every prior attempt, not just the most recent.
+            plan = self._reflector.reflect(task, iterations)
+            current_answer = self._regenerate_answer(task, iterations, plan, step)
             latest_verdict = self._verifier.verify(task, current_answer)
-            iterations.append(Iteration(step=step, answer=current_answer, verdict=latest_verdict, refined=True))
+            iterations.append(
+                Iteration(
+                    step=step,
+                    answer=current_answer,
+                    verdict=latest_verdict,
+                    refined=True,
+                    reflection=plan,
+                )
+            )
 
         return iterations
 
     def _needs_refinement(self, verdict: Verdict) -> bool:
         return verdict.verdict in BAD_VERDICTS or verdict.confidence < self._config.confidence_threshold
 
-    def _regenerate_answer(self, task: Task, history: list[Iteration], attempt: int) -> str:
-        """Rewrite the answer, given every prior failed attempt and an
-        attempt-scaled instruction (retry-with-improved-prompt)."""
+    def _regenerate_answer(
+        self, task: Task, history: list[Iteration], plan: ReflectionPlan, attempt: int
+    ) -> str:
+        """Rewrite the answer, executing the reflection plan, given every prior
+        failed attempt and an attempt-scaled instruction (retry-with-improved-prompt)."""
         attempts = "\n".join(
             f"ATTEMPT {it.step + 1} produced: {it.answer!r}\n"
             f"  -> judged '{it.verdict.verdict}': {it.verdict.rationale}"
@@ -86,6 +106,7 @@ claims the evidence does not support. Return only the corrected answer."""
             f"QUESTION: {task.question}\n\n"
             f"EVIDENCE: {task.reference_context}\n\n"
             f"PRIOR FAILED ATTEMPTS (do not repeat these mistakes):\n{attempts}\n\n"
+            f"{self._fix_plan_block(plan)}"
             f"{self._escalation_for(attempt)}"
         )
         raw = self._client.complete_structured(
@@ -95,6 +116,24 @@ claims the evidence does not support. Return only the corrected answer."""
             tool_name="emit_answer",
         )
         return raw["answer"].strip()
+
+    @staticmethod
+    def _fix_plan_block(plan: ReflectionPlan) -> str:
+        """Render the reflection plan, or nothing if the plan came back empty.
+
+        A partial/empty plan (a model occasionally omits fields) degrades
+        gracefully: the regenerator still has the failure history above to work
+        from, so it simply gets no FIX PLAN block rather than a misleading one."""
+        lines = []
+        if plan.diagnosis:
+            lines.append(f"- diagnosis: {plan.diagnosis}")
+        if plan.what_to_change:
+            lines.append(f"- what to change: {plan.what_to_change}")
+        if plan.what_to_keep:
+            lines.append(f"- what to keep: {plan.what_to_keep}")
+        if not lines:
+            return ""
+        return "FIX PLAN:\n" + "\n".join(lines) + "\n\n"
 
     def _escalation_for(self, attempt: int) -> str:
         """The instruction for this retry; firmer with each pass, clamped to the

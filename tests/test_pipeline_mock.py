@@ -16,6 +16,8 @@ class ScriptedLLM:
         self.verify_calls = 0
 
     def complete_structured(self, *, system, prompt, schema, tool_name):
+        if tool_name == "emit_reflection":
+            return {"diagnosis": "named the wrong marker", "what_to_change": "use CYP2E1"}
         if tool_name == "emit_answer":
             return {"answer": "Corrected answer grounded in evidence."}
         self.verify_calls += 1
@@ -68,6 +70,8 @@ def test_eval_scores_initial_verdict_against_ground_truth():
 def test_weak_question_and_low_confidence_are_flagged():
     class WeakQ:
         def complete_structured(self, *, system, prompt, schema, tool_name):
+            if tool_name == "emit_reflection":
+                return {"diagnosis": "vague", "what_to_change": "stay within evidence"}
             if tool_name == "emit_answer":
                 return {"answer": "still cannot answer from the given evidence"}
             return {

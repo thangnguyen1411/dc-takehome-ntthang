@@ -31,6 +31,10 @@ def _print_verbose(curated) -> None:
             f"[curation]     {label}: {verdict.verdict} (conf {verdict.confidence:.2f})",
             flush=True,
         )
+        # The reflection plan that led to this pass (retries only).
+        if it.reflection is not None:
+            print(f"[curation]       reflect: {it.reflection.diagnosis}", flush=True)
+            print(f"[curation]       fix: {it.reflection.what_to_change}", flush=True)
         # A panel rationale is the per-verifier votes joined by ' | '; a single
         # verifier is one plain rationale. Either way, one line per part.
         for part in verdict.rationale.split(" | "):
