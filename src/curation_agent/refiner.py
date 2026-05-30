@@ -10,14 +10,15 @@ from __future__ import annotations
 from .config import BAD_VERDICTS, Config
 from .llm import LLMClient
 from .models import Iteration, Task, Verdict
-from .verifier import Verifier
+from .verifier import AnswerVerifier
 
 
 class Refiner:
     """Runs the critic -> regenerate -> re-verify loop over a single task.
 
-    Depends on a `Verifier` (to judge) and the raw `LLMClient` (to regenerate),
-    with thresholds and the iteration cap read from `Config`.
+    Depends on an `AnswerVerifier` (a single `Verifier` or a `PanelVerifier`) to
+    judge, and the raw `LLMClient` to regenerate, with thresholds and the
+    iteration cap read from `Config`.
     """
 
     SYSTEM = """You rewrite a scientific answer so it is fully faithful to the
@@ -31,7 +32,7 @@ claims the evidence does not support. Return only the corrected answer."""
         "required": ["answer"],
     }
 
-    def __init__(self, client: LLMClient, verifier: Verifier, config: Config) -> None:
+    def __init__(self, client: LLMClient, verifier: AnswerVerifier, config: Config) -> None:
         self._client = client
         self._verifier = verifier
         self._config = config

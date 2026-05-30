@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+import time
 from pathlib import Path
 
 from .config import Config
@@ -20,10 +21,43 @@ from .llm import build_client
 from .pipeline import Pipeline
 
 
+def _print_verbose(curated) -> None:
+    """Print the per-task reasoning trace: each refinement pass and, for a panel,
+    each verifier's vote (recovered from the combined rationale)."""
+    for it in curated.iterations:
+        verdict = it.verdict
+        label = "initial" if it.step == 0 else f"refine pass {it.step}"
+        print(
+            f"[curation]     {label}: {verdict.verdict} (conf {verdict.confidence:.2f})",
+            flush=True,
+        )
+        # A panel rationale is the per-verifier votes joined by ' | '; a single
+        # verifier is one plain rationale. Either way, one line per part.
+        for part in verdict.rationale.split(" | "):
+            print(f"[curation]       {part}", flush=True)
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Scientific data curation agent")
     parser.add_argument("--csv", default="data/tasks.csv", help="path to the task CSV")
     parser.add_argument("--out", default="outputs", help="output directory")
+    parser.add_argument(
+        "--provider", choices=["anthropic", "openai"], default="anthropic",
+        help="model provider (default: anthropic)",
+    )
+    parser.add_argument("--model", default=None, help="override the provider's default model id")
+    parser.add_argument(
+        "--panel",
+        default=None,
+        help="comma-separated verifier panel of provider:model specs for cross-checking, "
+        "e.g. 'anthropic:claude-opus-4-8,openai:gpt-4o' (default: single verifier). "
+        "Each provider listed needs its own API key.",
+    )
+    parser.add_argument(
+        "--verbose",
+        action="store_true",
+        help="print each refinement pass and every verifier's vote per task",
+    )
     args = parser.parse_args(argv)
 
     try:
@@ -33,23 +67,57 @@ def main(argv: list[str] | None = None) -> int:
     except ImportError:
         pass
 
-    config = Config()
+    panel = tuple(spec.strip() for spec in args.panel.split(",") if spec.strip()) if args.panel else ()
+    config = Config(provider=args.provider, model=args.model, verifier_panel=panel)
     try:
         client = build_client(config)
     except RuntimeError as exc:
         print(f"[curation] {exc}", file=sys.stderr)
         return 1
-    print(f"[curation] LLM backend: anthropic:{config.model}")
+    primary = f"{config.provider}:{config.resolved_model}"
+    verifier_backend = " + ".join(config.verifier_panel) if config.verifier_panel else primary
+    print(f"[curation] verifier: {verifier_backend} | regeneration: {primary}")
 
     tasks = Ingestor().load(args.csv)
     print(f"[curation] loaded {len(tasks)} tasks from {args.csv}")
 
+    # Per-task progress logging. The pipeline stays I/O-free; the CLI owns output.
+    timer = {"start": 0.0}
+
+    def on_task_start(index: int, total: int, task) -> None:
+        print("[curation] " + "-" * 60, flush=True)
+        print(f"[curation] [{index}/{total}] {task.task_id}: verifying...", flush=True)
+        timer["start"] = time.monotonic()
+
+    def on_task_done(index: int, total: int, curated) -> None:
+        elapsed = time.monotonic() - timer["start"]
+        flags = []
+        if curated.refinement_applied:
+            flags.append("refined")
+        if curated.detected_issues:
+            flags.append(f"issues: {', '.join(curated.detected_issues)}")
+        suffix = f" ({'; '.join(flags)})" if flags else ""
+        print(
+            f"[curation] [{index}/{total}] {curated.task_id}: "
+            f"{curated.final_verdict} (conf {curated.answer_confidence:.2f}) "
+            f"[{elapsed:.1f}s]{suffix}",
+            flush=True,
+        )
+        if args.verbose:
+            _print_verbose(curated)
+
+    print(f"[curation] verifying {len(tasks)} tasks (this calls the model per task)...", flush=True)
+    run_start = time.monotonic()
     try:
-        results = Pipeline.build(client, config).run(tasks)
+        results = Pipeline.build(client, config).run(
+            tasks, on_task_start=on_task_start, on_task_done=on_task_done
+        )
     except Exception as exc:  # top-level boundary: report cleanly, no stack dump
         print(f"[curation] ERROR talking to the model: {exc}", file=sys.stderr)
-        print("[curation] check ANTHROPIC_API_KEY and your account credits.", file=sys.stderr)
+        print(f"[curation] check {config.api_key_env} and your account credits.", file=sys.stderr)
         return 1
+    print(f"[curation] " + "-" * 60, flush=True)
+    print(f"[curation] verified {len(results)} tasks in {time.monotonic() - run_start:.1f}s", flush=True)
 
     # Evaluate first so the ground-truth annotations are present when results
     # are serialized.
