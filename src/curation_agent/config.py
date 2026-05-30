@@ -43,6 +43,9 @@ class Config:
     # their firmer tiers on hard cases.
     max_refine_iterations: int = 3
     max_tokens: int = 1024
+    # When True, each client prints every LLM request + response, tagged by
+    # provider:model (see log_llm_call). Enabled via --llm-log; verbose and noisy.
+    llm_log: bool = False
 
     @property
     def resolved_model(self) -> str:

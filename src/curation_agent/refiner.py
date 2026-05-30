@@ -65,6 +65,7 @@ claims the evidence does not support. Return only the corrected answer."""
         iterations: list[Iteration] = []
         current_answer = task.candidate_answer
 
+        self._log_step("verify (initial answer)")
         latest_verdict = self._verifier.verify(task, current_answer)
         iterations.append(Iteration(step=0, answer=current_answer, verdict=latest_verdict, refined=False))
 
@@ -74,8 +75,11 @@ claims the evidence does not support. Return only the corrected answer."""
             # Reflect (plan the fix) -> regenerate (execute) -> re-verify. The
             # reflector and regenerator both see the whole failure history, so a
             # retry learns from every prior attempt, not just the most recent.
+            self._log_step(f"refine pass {step}: reflect")
             plan = self._reflector.reflect(task, iterations)
+            self._log_step(f"refine pass {step}: regenerate")
             current_answer = self._regenerate_answer(task, iterations, plan, step)
+            self._log_step(f"refine pass {step}: verify")
             latest_verdict = self._verifier.verify(task, current_answer)
             iterations.append(
                 Iteration(
@@ -88,6 +92,14 @@ claims the evidence does not support. Return only the corrected answer."""
             )
 
         return iterations
+
+    def _log_step(self, message: str) -> None:
+        """Announce the current loop phase within the --llm-log stream so the dense
+        LLM request/response lines are easy to group. Part of the llm-log feature,
+        so it shares that family's `[LLM-...]` prefix rather than the `[curation]`
+        pipeline prefix."""
+        if self._config.llm_log:
+            print(f"[LLM-step] {message}", flush=True)
 
     def _needs_refinement(self, verdict: Verdict) -> bool:
         return verdict.verdict in BAD_VERDICTS or verdict.confidence < self._config.confidence_threshold
