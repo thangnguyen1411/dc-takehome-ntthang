@@ -1,14 +1,25 @@
 """Stage 2: the verification agent.
 
-Given a question, its evidence, and a candidate answer, the `Verifier` returns a
-structured `Verdict`. The system prompt pins it to the evidence only and defines
-the issue taxonomy; the user prompt carries the labelled task fields.
+Given a question, its evidence, and a candidate answer, a verifier returns a
+structured `Verdict`. `Verifier` is a single-model judge; `PanelVerifier` runs
+several judges (optionally across providers) and votes. Both satisfy the
+`AnswerVerifier` protocol, so the refine loop is agnostic to which is used.
 """
 
 from __future__ import annotations
 
+from collections import Counter
+from typing import Protocol
+
 from .llm import LLMClient
-from .models import Task, Verdict
+from .models import RubricScores, Task, Verdict
+
+
+class AnswerVerifier(Protocol):
+    """Anything that can judge an answer against its task and return a Verdict."""
+
+    def verify(self, task: Task, answer: str) -> Verdict:
+        ...
 
 
 class Verifier:
@@ -70,8 +81,9 @@ grounded in specific evidence tokens."""
         "required": ["verdict", "confidence", "question_quality_score", "rubric", "detected_issues", "rationale"],
     }
 
-    def __init__(self, client: LLMClient) -> None:
+    def __init__(self, client: LLMClient, name: str = "verifier") -> None:
         self._client = client
+        self.name = name
 
     def verify(self, task: Task, answer: str) -> Verdict:
         raw = self._client.complete_structured(
@@ -85,3 +97,81 @@ grounded in specific evidence tokens."""
     @staticmethod
     def _prompt(question: str, evidence: str, answer: str) -> str:
         return f"QUESTION: {question}\n\nEVIDENCE: {evidence}\n\nANSWER: {answer}"
+
+
+class PanelVerifier:
+    """Runs several verifiers independently and combines them into one Verdict.
+
+    Independent judges (ideally across providers) reduce shared blind spots: a
+    single self-judging model can rubber-stamp its own style of error, whereas a
+    cross-model panel must agree. The combination rules:
+
+    - verdict: majority vote. On a tie, prefer flagging a problem over `supported`
+      (a false flag is cheaper than a missed bad answer in curation); among tied
+      flagged labels, take the one its voters were most confident about.
+    - confidence: mean confidence of the verifiers that voted for the chosen verdict.
+    - question_quality_score & rubric axes: mean across all verifiers.
+    - detected_issues: union across all verifiers, plus `panel_disagreement` when
+      the verifiers were not unanimous (a strong "send to a human" signal).
+    - rationale: each verifier's rationale, attributed by name.
+    """
+
+    def __init__(self, verifiers: list[Verifier]) -> None:
+        if not verifiers:
+            raise ValueError("PanelVerifier needs at least one verifier")
+        self._verifiers = verifiers
+
+    def verify(self, task: Task, answer: str) -> Verdict:
+        verdicts = [v.verify(task, answer) for v in self._verifiers]
+        if len(verdicts) == 1:
+            return verdicts[0]
+        return self._combine(verdicts)
+
+    def _combine(self, verdicts: list[Verdict]) -> Verdict:
+        chosen = self._vote(verdicts)
+        agreed = [v for v in verdicts if v.verdict == chosen]
+        unanimous = len({v.verdict for v in verdicts}) == 1
+
+        issues = {issue for v in verdicts for issue in v.detected_issues}
+        if not unanimous:
+            issues.add("panel_disagreement")
+
+        return Verdict(
+            verdict=chosen,
+            confidence=self._mean(v.confidence for v in agreed),
+            question_quality_score=self._mean(v.question_quality_score for v in verdicts),
+            rubric=RubricScores(
+                faithfulness=self._mean(v.rubric.faithfulness for v in verdicts),
+                completeness=self._mean(v.rubric.completeness for v in verdicts),
+                specificity=self._mean(v.rubric.specificity for v in verdicts),
+            ),
+            detected_issues=sorted(issues),
+            rationale=self._combine_rationales(verdicts),
+        )
+
+    def _vote(self, verdicts: list[Verdict]) -> str:
+        counts = Counter(v.verdict for v in verdicts)
+        top_count = counts.most_common(1)[0][1]
+        leaders = [label for label, c in counts.items() if c == top_count]
+        if len(leaders) == 1:
+            return leaders[0]
+        # Tie. Prefer flagging a problem over 'supported'; among the remaining
+        # candidates, pick the label its voters were on average most confident
+        # about. A tie means >= 2 *distinct* labels, so dropping 'supported'
+        # always leaves at least one candidate.
+        candidates = [label for label in leaders if label != "supported"]
+        return max(candidates, key=lambda label: self._mean(
+            v.confidence for v in verdicts if v.verdict == label
+        ))
+
+    def _combine_rationales(self, verdicts: list[Verdict]) -> str:
+        parts = [
+            f"[{vf.name}] judged '{v.verdict}' ({v.confidence:.2f}): {v.rationale}"
+            for vf, v in zip(self._verifiers, verdicts)
+        ]
+        return " | ".join(parts)
+
+    @staticmethod
+    def _mean(values) -> float:
+        values = list(values)
+        return sum(values) / len(values) if values else 0.0

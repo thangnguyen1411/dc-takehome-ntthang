@@ -9,10 +9,10 @@ from __future__ import annotations
 
 from .checks import DeterministicChecker
 from .config import Config
-from .llm import LLMClient
+from .llm import LLMClient, make_client
 from .models import CurationResult, Iteration, RubricScores, Task
 from .refiner import Refiner
-from .verifier import Verifier
+from .verifier import AnswerVerifier, PanelVerifier, Verifier
 
 
 class Pipeline:
@@ -24,19 +24,44 @@ class Pipeline:
 
     @classmethod
     def build(cls, client: LLMClient, config: Config) -> "Pipeline":
-        """Composition root: assemble the verifier -> refiner -> pipeline graph."""
-        verifier = Verifier(client)
+        """Composition root: assemble the verifier -> refiner -> pipeline graph.
+
+        `client` is the primary Anthropic client, always used for regeneration.
+        Verification uses a single `Verifier` over that same client by default, or
+        a cross-checking `PanelVerifier` when `config.verifier_panel` is set.
+        """
+        verifier = cls._build_verifier(client, config)
         refiner = Refiner(client, verifier, config)
         return cls(refiner, config)
 
-    def run(self, tasks: list[Task]) -> list[CurationResult]:
+    @staticmethod
+    def _build_verifier(client: LLMClient, config: Config) -> AnswerVerifier:
+        if not config.verifier_panel:
+            return Verifier(client)
+        verifiers = [Verifier(make_client(spec, config), name=spec) for spec in config.verifier_panel]
+        return PanelVerifier(verifiers)
+
+    def run(self, tasks: list[Task], on_task_start=None, on_task_done=None) -> list[CurationResult]:
+        """Curate every task, returning one `CurationResult` each.
+
+        Optional callbacks let a caller report progress without the pipeline doing
+        any I/O itself (keeping it a pure library component):
+        `on_task_start(index, total, task)` fires before a task is curated, and
+        `on_task_done(index, total, curated)` fires after. Both use a 1-based index.
+        """
         checker = DeterministicChecker(tasks)
+        total = len(tasks)
         results: list[CurationResult] = []
-        for task in tasks:
+        for index, task in enumerate(tasks, start=1):
+            if on_task_start is not None:
+                on_task_start(index, total, task)
             try:
-                results.append(self._curate_task(task, checker))
+                curated = self._curate_task(task, checker)
             except Exception as exc:  # isolate per-task: record and continue
-                results.append(self._error_result(task, exc))
+                curated = self._error_result(task, exc)
+            results.append(curated)
+            if on_task_done is not None:
+                on_task_done(index, total, curated)
         return results
 
     def _curate_task(self, task: Task, checker: DeterministicChecker) -> CurationResult:
