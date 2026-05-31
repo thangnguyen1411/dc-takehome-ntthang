@@ -66,6 +66,18 @@ def main(argv: list[str] | None = None) -> int:
         "Each provider listed needs its own API key.",
     )
     parser.add_argument(
+        "--debate",
+        action="store_true",
+        help="make the --panel judges debate (see each other's rationales and revise "
+        "over rounds) instead of voting independently; needs a panel of >= 2",
+    )
+    parser.add_argument(
+        "--debate-rounds",
+        type=int,
+        default=2,
+        help="max revision rounds when --debate is set (default 2)",
+    )
+    parser.add_argument(
         "--verbose",
         action="store_true",
         help="print each refinement pass and every verifier's vote per task",
@@ -103,10 +115,14 @@ def main(argv: list[str] | None = None) -> int:
         pass
 
     panel = tuple(spec.strip() for spec in args.panel.split(",") if spec.strip()) if args.panel else ()
+    if args.debate and len(panel) < 2:
+        print("[curation] --debate needs a --panel of at least two verifiers.", file=sys.stderr)
+        return 1
     # A source is used only if selected: --corpus PATH enables the corpus,
     # --pubmed enables PubMed. Either or both.
     config = Config(
         provider=args.provider, model=args.model, verifier_panel=panel,
+        debate=args.debate, debate_rounds=args.debate_rounds,
         llm_log=args.llm_log, retrieve=args.retrieve, corpus_path=args.corpus,
         use_corpus=bool(args.corpus), use_pubmed=args.pubmed,
     )
@@ -121,6 +137,10 @@ def main(argv: list[str] | None = None) -> int:
         return 1
     primary = f"{config.provider}:{config.resolved_model}"
     verifier_backend = " + ".join(config.verifier_panel) if config.verifier_panel else primary
+    if config.debate:
+        verifier_backend += f" (debate, {config.debate_rounds} rounds)"
+    elif config.verifier_panel:
+        verifier_backend += " (panel vote)"
     print(f"[curation] verifier: {verifier_backend} | regeneration: {primary}")
     if config.retrieve:
         sources = ([f"corpus:{config.corpus_path}"] if config.use_corpus else []) \

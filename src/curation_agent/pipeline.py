@@ -17,7 +17,7 @@ from .models import CurationResult, Iteration, RubricScores, Task
 from .reflector import Reflector
 from .refiner import Refiner
 from .retriever import CompositeRetriever, KeywordRetriever, PubMedRetriever, Retriever
-from .verifier import AnswerVerifier, PanelVerifier, Verifier
+from .verifier import AnswerVerifier, DebateVerifier, PanelVerifier, Verifier
 
 
 class Pipeline:
@@ -79,6 +79,8 @@ class Pipeline:
         if not config.verifier_panel:
             return Verifier(client)
         verifiers = [Verifier(make_client(spec, config), name=spec) for spec in config.verifier_panel]
+        if config.debate:
+            return DebateVerifier(verifiers, max_rounds=config.debate_rounds, log=config.llm_log)
         return PanelVerifier(verifiers)
 
     def run(self, tasks: list[Task], on_task_start=None, on_task_done=None) -> list[CurationResult]:
