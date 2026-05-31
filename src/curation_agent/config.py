@@ -31,6 +31,11 @@ class Config:
     # verifications and majority-votes the verdict; a cross-provider panel
     # (e.g. anthropic + openai) reduces shared-blind-spot risk.
     verifier_panel: tuple[str, ...] = ()
+    # When True (and a panel of >= 2 is set), the panel *debates* instead of voting
+    # independently: each judge sees the others' rationales each round and may
+    # revise, before the final vote. `debate_rounds` caps the revision rounds.
+    debate: bool = False
+    debate_rounds: int = 2
     # Below this confidence the refine loop is triggered even if the verdict
     # itself looks acceptable.
     confidence_threshold: float = 0.75
