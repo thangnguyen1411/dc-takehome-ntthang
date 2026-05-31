@@ -66,13 +66,14 @@ class AnthropicLLM:
     rather than by inheritance.
     """
 
-    def __init__(self, model: str, max_tokens: int, log: bool = False) -> None:
+    def __init__(self, model: str, max_tokens: int, log: bool = False, temperature: float = 0.0) -> None:
         from anthropic import Anthropic  # imported lazily so offline mode needs no SDK
 
         self._client = Anthropic()
         self._model = model
         self._max_tokens = max_tokens
         self._log = log
+        self._temperature = temperature
 
     def complete_structured(
         self,
@@ -93,6 +94,7 @@ class AnthropicLLM:
         response = self._client.messages.create(
             model=self._model,
             max_tokens=self._max_tokens,
+            temperature=self._temperature,
             # Cache the static rubric system prompt: it is identical across all
             # tasks, so this turns N full prompt reads into 1 + (N-1) cache hits.
             system=[{"type": "text", "text": system, "cache_control": {"type": "ephemeral"}}],
@@ -117,13 +119,14 @@ class OpenAILLM:
     the returned arguments are the structured result.
     """
 
-    def __init__(self, model: str, max_tokens: int, log: bool = False) -> None:
+    def __init__(self, model: str, max_tokens: int, log: bool = False, temperature: float = 0.0) -> None:
         from openai import OpenAI  # imported lazily so Anthropic-only runs need no SDK
 
         self._client = OpenAI()
         self._model = model
         self._max_tokens = max_tokens
         self._log = log
+        self._temperature = temperature
 
     def complete_structured(
         self,
@@ -144,6 +147,7 @@ class OpenAILLM:
         response = self._client.chat.completions.create(
             model=self._model,
             max_tokens=self._max_tokens,
+            temperature=self._temperature,
             messages=[
                 {"role": "system", "content": system},
                 {"role": "user", "content": prompt},
@@ -198,5 +202,5 @@ def make_client(spec: str, config) -> LLMClient:
         )
     model = model or DEFAULT_MODELS[provider]
     if provider == "openai":
-        return OpenAILLM(model, config.max_tokens, log=config.llm_log)
-    return AnthropicLLM(model, config.max_tokens, log=config.llm_log)
+        return OpenAILLM(model, config.max_tokens, log=config.llm_log, temperature=config.temperature)
+    return AnthropicLLM(model, config.max_tokens, log=config.llm_log, temperature=config.temperature)
