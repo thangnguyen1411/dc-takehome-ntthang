@@ -27,6 +27,7 @@ class DeterministicChecker:
         issues = self.schema_issues(task)
         if task.task_id in self._duplicate_ids:
             issues.append("duplicate_task")
+        issues.extend(self.citation_issues(task))
         return issues
 
     @staticmethod
@@ -45,6 +46,29 @@ class DeterministicChecker:
         if not task.reference_context:
             issues.append("missing_evidence")
         return issues
+
+    # Citation-like tokens the answer might cite: numeric refs ([1], [12]),
+    # author-year ((Smith et al., 2020), (Lee 2019)), bare "et al.", DOIs, and
+    # PMIDs. Deterministic — the LLM is not trusted to police its own citations.
+    _CITATION_PATTERNS = (
+        r"\[\d{1,3}(?:[,\-–]\s*\d{1,3})*\]",         # [1], [3, 4], [5-7]
+        r"\b[A-Z][A-Za-z]+\s+et\s+al\.?(?:,?\s*\d{4})?",  # Smith et al., 2020
+        r"\([A-Z][A-Za-z]+(?:\s+(?:and|&)\s+[A-Z][A-Za-z]+)?,?\s*\d{4}[a-z]?\)",  # (Lee 2019)
+        r"\b10\.\d{4,9}/\S+\b",                        # DOI
+        r"\bPMID:?\s*\d+\b",                           # PMID: 12345678
+    )
+
+    @classmethod
+    def citation_issues(cls, task: Task) -> list[str]:
+        """Flag `hallucinated_citation` when the answer cites a source absent from
+        the evidence - a fabricated reference. Citations *present* in the evidence
+        are fine; only ones the evidence never mentions are flagged."""
+        evidence = task.reference_context.lower()
+        for pattern in cls._CITATION_PATTERNS:
+            for match in re.findall(pattern, task.candidate_answer):
+                if match.strip().lower() not in evidence:
+                    return ["hallucinated_citation"]
+        return []
 
     @classmethod
     def _find_duplicates(cls, tasks: list[Task]) -> dict[str, list[str]]:
