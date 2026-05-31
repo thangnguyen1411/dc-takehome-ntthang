@@ -1,0 +1,5 @@
+# Neurology — neurodegeneration and disease-modifying therapy.
+# Real, well-established findings paraphrased from authoritative public sources
+# (NINDS/NIH, NIA, PubMed/PMC). One self-contained statement per line.
+Parkinson's disease is characterized neuropathologically by progressive loss of dopaminergic neurons in the substantia nigra pars compacta and by alpha-synuclein-containing Lewy bodies, with nigral neurons being selectively vulnerable relative to the neighboring ventral tegmental area.
+Lecanemab, an anti-amyloid monoclonal antibody that binds soluble amyloid-beta protofibrils, slowed cognitive decline by about 27 percent over 18 months versus placebo in the Clarity AD trial of early Alzheimer's disease.

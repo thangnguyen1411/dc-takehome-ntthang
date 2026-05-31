@@ -10,6 +10,7 @@ from __future__ import annotations
 from .config import BAD_VERDICTS, Config
 from .llm import LLMClient
 from .models import Iteration, ReflectionPlan, Task, Verdict
+from .prompts import EVIDENCE_PRECEDENCE_RULE
 from .reflector import Reflector
 from .verifier import AnswerVerifier
 
@@ -25,7 +26,9 @@ class Refiner:
     SYSTEM = """You rewrite a scientific answer so it is fully faithful to the
 evidence. Use ONLY the supplied evidence. Correct any contradiction or
 hallucination, state the evidence's central finding directly, and do not add
-claims the evidence does not support. Return only the corrected answer."""
+claims the evidence does not support. Return only the corrected answer.
+
+""" + EVIDENCE_PRECEDENCE_RULE
 
     SCHEMA = {
         "type": "object",
@@ -116,7 +119,7 @@ claims the evidence does not support. Return only the corrected answer."""
         )
         prompt = (
             f"QUESTION: {task.question}\n\n"
-            f"EVIDENCE: {task.reference_context}\n\n"
+            f"{task.evidence_block()}\n\n"
             f"PRIOR FAILED ATTEMPTS (do not repeat these mistakes):\n{attempts}\n\n"
             f"{self._fix_plan_block(plan)}"
             f"{self._escalation_for(attempt)}"

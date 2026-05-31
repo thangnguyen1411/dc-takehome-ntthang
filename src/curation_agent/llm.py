@@ -10,7 +10,41 @@ substitute their own scripted doubles.
 from __future__ import annotations
 
 import json
+import re
 from typing import Any, Protocol
+
+# Claude occasionally leaks its tool-call wire format (e.g. `</parameter>`,
+# `<parameter name="...">`, `</invoke>`) into a returned string field instead of
+# using the structured multi-field output. The SDK parses the tool call fine —
+# the pollution is in the field *values* — so we strip these tokens at the client
+# boundary. The pattern only matches the specific tool keywords, so legitimate
+# text like "p < 0.05" is untouched.
+_TOOL_ARTIFACT_RE = re.compile(r"</?(?:function_calls|invoke|parameter)\b[^>]*>")
+
+
+def _strip_tool_artifacts(value: Any) -> Any:
+    """Recursively remove leaked tool-call markup from strings in a result."""
+    if isinstance(value, str):
+        return _TOOL_ARTIFACT_RE.sub("", value).strip()
+    if isinstance(value, dict):
+        return {k: _strip_tool_artifacts(v) for k, v in value.items()}
+    if isinstance(value, list):
+        return [_strip_tool_artifacts(v) for v in value]
+    return value
+
+
+def log_llm_call(label: str, tool_name: str, prompt: str, result: dict[str, Any]) -> None:
+    """Print one LLM request + response to the terminal (the --llm-log feature).
+
+    Every line carries the full tag `[LLM-<provider:model> <REQUEST|RESPONSE> <tool>]`
+    so each line is self-describing and greppable. Called from inside each client
+    (the only place the raw prompt/response exist) when logging is enabled.
+    """
+    req = f"[LLM-{label} REQUEST {tool_name}]"
+    res = f"[LLM-{label} RESPONSE {tool_name}]"
+    for line in prompt.splitlines():
+        print(f"{req} {line}", flush=True)
+    print(f"{res} {json.dumps(result, ensure_ascii=False)}", flush=True)
 
 
 class LLMClient(Protocol):
@@ -25,26 +59,11 @@ class LLMClient(Protocol):
         ...
 
 
-def log_llm_call(label: str, tool_name: str, prompt: str, result: dict[str, Any]) -> None:
-    """Print one LLM request + response to the terminal.
-
-    Every line carries the full tag `[LLM-<provider:model> <REQUEST|RESPONSE> <tool>]`
-    so each line is self-describing and greppable (e.g. filter by provider, by
-    direction, or by tool). Called from inside each client (the only place the raw
-    prompt/response exist) when logging is enabled via the CLI --llm-log flag.
-    """
-    req = f"[LLM-{label} REQUEST {tool_name}]"
-    res = f"[LLM-{label} RESPONSE {tool_name}]"
-    for line in prompt.splitlines():
-        print(f"{req} {line}", flush=True)
-    print(f"{res} {json.dumps(result, ensure_ascii=False)}", flush=True)
-
-
 class AnthropicLLM:
     """Calls the real Anthropic API and forces a single tool call as output.
 
-    Conforms to `LLMClient` structurally (via the `structured` method) rather
-    than by inheritance.
+    Conforms to `LLMClient` structurally (via the `complete_structured` method)
+    rather than by inheritance.
     """
 
     def __init__(self, model: str, max_tokens: int, log: bool = False) -> None:
@@ -67,15 +86,15 @@ class AnthropicLLM:
             "name": tool_name,
             "description": "Return the structured result.",
             "input_schema": schema,
-            # The tool schema is also identical across tasks; caching it extends
-            # the cached prefix (system + tools) at no extra cost.
+            # The tool schema is identical across tasks; caching it extends the
+            # cached prefix (system + tools) at no extra cost.
             "cache_control": {"type": "ephemeral"},
         }
         response = self._client.messages.create(
             model=self._model,
             max_tokens=self._max_tokens,
             # Cache the static rubric system prompt: it is identical across all
-            # 10 tasks, so this turns 10 full prompt reads into 1 + 9 cache hits.
+            # tasks, so this turns N full prompt reads into 1 + (N-1) cache hits.
             system=[{"type": "text", "text": system, "cache_control": {"type": "ephemeral"}}],
             tools=[tool],
             tool_choice={"type": "tool", "name": tool_name},
@@ -83,7 +102,7 @@ class AnthropicLLM:
         )
         for block in response.content:
             if block.type == "tool_use" and block.name == tool_name:
-                result = dict(block.input)
+                result = _strip_tool_artifacts(dict(block.input))
                 if self._log:
                     log_llm_call(f"anthropic:{self._model}", tool_name, prompt, result)
                 return result
@@ -135,7 +154,7 @@ class OpenAILLM:
         calls = response.choices[0].message.tool_calls
         if not calls:
             raise RuntimeError(f"model did not call function {tool_name!r}")
-        result = json.loads(calls[0].function.arguments)
+        result = _strip_tool_artifacts(json.loads(calls[0].function.arguments))
         if self._log:
             log_llm_call(f"openai:{self._model}", tool_name, prompt, result)
         return result
@@ -144,8 +163,8 @@ class OpenAILLM:
 def build_client(config) -> LLMClient:
     """Return the client for the configured provider, requiring its API key.
 
-    The concrete client (`AnthropicLLM` or `OpenAILLM`) satisfies the
-    `LLMClient` Protocol that downstream stages depend on.
+    The concrete client (`AnthropicLLM` or `OpenAILLM`) satisfies the `LLMClient`
+    Protocol that downstream stages depend on.
     """
     if not config.has_api_key:
         raise RuntimeError(

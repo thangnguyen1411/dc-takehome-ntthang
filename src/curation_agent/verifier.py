@@ -13,6 +13,7 @@ from typing import Protocol
 
 from .llm import LLMClient
 from .models import RubricScores, Task, Verdict
+from .prompts import EVIDENCE_PRECEDENCE_RULE
 
 
 class AnswerVerifier(Protocol):
@@ -55,7 +56,9 @@ independently of the single verdict and of each other:
 
 List detected_issues using the verdict names plus optional tags like
 missing_citation or unsupported_claim. Give a one to three sentence rationale
-grounded in specific evidence tokens."""
+grounded in specific evidence tokens.
+
+""" + EVIDENCE_PRECEDENCE_RULE
 
     SCHEMA = {
         "type": "object",
@@ -88,15 +91,17 @@ grounded in specific evidence tokens."""
     def verify(self, task: Task, answer: str) -> Verdict:
         raw = self._client.complete_structured(
             system=self.SYSTEM,
-            prompt=self._prompt(task.question, task.reference_context, answer),
+            prompt=self._prompt(task, answer),
             schema=self.SCHEMA,
             tool_name="emit_verdict",
         )
         return Verdict(**raw)
 
     @staticmethod
-    def _prompt(question: str, evidence: str, answer: str) -> str:
-        return f"QUESTION: {question}\n\nEVIDENCE: {evidence}\n\nANSWER: {answer}"
+    def _prompt(task: Task, answer: str) -> str:
+        # `evidence_block()` carries its own section header(s) — given evidence and
+        # retrieved context are separate, self-labeled sections, not one EVIDENCE blob.
+        return f"QUESTION: {task.question}\n\n{task.evidence_block()}\n\nANSWER: {answer}"
 
 
 class PanelVerifier:

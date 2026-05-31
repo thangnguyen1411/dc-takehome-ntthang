@@ -1,0 +1,6 @@
+# Immunology & inflammation — mechanisms of immune-directed therapy.
+# Real, well-established findings paraphrased from authoritative public sources
+# (NIH/PubMed/PMC). One self-contained statement per line.
+In rheumatoid arthritis, TNF inhibitors and methotrexate act through complementary mechanisms — TNF inhibitors suppress monocytes and dendritic cells while methotrexate raises anti-inflammatory adenosine and curbs lymphocyte proliferation — so the combination is more effective than either alone.
+Inhaled corticosteroids control asthma by binding the glucocorticoid receptor to suppress pro-inflammatory gene transcription, reducing eosinophilic airway inflammation and airway hyperresponsiveness.
+Immune checkpoint blockade with anti-PD-1 antibodies such as pembrolizumab restores T-cell antitumor activity by blocking the PD-1/PD-L1 interaction that tumors exploit to evade immune attack.

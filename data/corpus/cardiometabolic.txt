@@ -1,0 +1,9 @@
+# Cardiometabolic & preventive medicine — mechanisms and outcome trials.
+# Real, well-established findings paraphrased from authoritative public sources
+# (NHLBI/NIH, NEJM, CDC, PubMed/PMC). One self-contained statement per line.
+Statins inhibit HMG-CoA reductase, the rate-limiting enzyme of hepatic cholesterol synthesis; meta-analyses show roughly a 21 to 22 percent reduction in major vascular events per 1 mmol/L reduction in LDL cholesterol.
+ACE inhibitors reduce mortality in heart failure with reduced ejection fraction by interrupting the renin-angiotensin-aldosterone system, blocking the conversion of angiotensin I to the vasoconstrictor angiotensin II, as shown in the CONSENSUS and SOLVD trials.
+Beta-blockers such as carvedilol and bisoprolol reduce sudden cardiac death and all-cause mortality in heart failure with reduced ejection fraction, as established by the MERIT-HF and COPERNICUS trials.
+Metformin lowers blood glucose primarily by decreasing hepatic glucose production, an effect linked to activation of AMP-activated protein kinase (AMPK) in the liver.
+In the SELECT trial, semaglutide, a GLP-1 receptor agonist, reduced major adverse cardiovascular events by about 20 percent in overweight or obese patients with established cardiovascular disease and without diabetes.
+Periconceptional folic acid supplementation of about 400 micrograms daily can prevent an estimated 50 to 70 percent of neural tube defects such as spina bifida and anencephaly.

@@ -46,6 +46,16 @@ class Config:
     # When True, each client prints every LLM request + response, tagged by
     # provider:model (see log_llm_call). Enabled via --llm-log; verbose and noisy.
     llm_log: bool = False
+    # Retrieval (RAG): when True, every task's reference_context is augmented with
+    # relevant snippets from the corpus at `corpus_path` (given evidence is kept,
+    # retrieved snippets appended). A snippet is only used if its relevance score
+    # clears `retrieval_threshold`; a task that had no evidence and gets no
+    # qualifying snippet is tagged `retrieval_failed` so the verdict stays honest.
+    retrieve: bool = False
+    corpus_path: str = "data/corpus"
+    retrieval_threshold: float = 0.25
+    # How many corpus snippets to pull per task (those clearing the threshold).
+    retrieval_top_k: int = 2
 
     @property
     def resolved_model(self) -> str:
