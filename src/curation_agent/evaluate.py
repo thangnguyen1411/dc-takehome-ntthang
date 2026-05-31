@@ -120,8 +120,12 @@ class Evaluator:
         report.mean_conf_incorrect = sum(conf_incorrect) / len(conf_incorrect) if conf_incorrect else 0.0
         return report
 
-    def render_markdown(self, report: EvalReport) -> str:
-        """Format an `EvalReport` (plus this run's results) as a markdown report."""
+    def render_markdown(self, report: EvalReport, queue_summary: str = "") -> str:
+        """Format an `EvalReport` (plus this run's results) as a markdown report.
+
+        `queue_summary` (optional) is a compact 'top review-queue items' block
+        (from `triage.render_summary`) embedded right after the headline metrics.
+        """
         lines: list[str] = ["# Curation Eval Report", ""]
         lines.append(f"- Tasks processed: **{report.total}**")
         lines.append(f"- Tasks scored against ground truth: **{report.scored}**")
@@ -132,6 +136,9 @@ class Evaluator:
         lines.append(f"- Mean confidence when correct: **{self._fmt_conf(report.mean_conf_correct, report.correct)}**")
         lines.append(f"- Mean confidence when incorrect: **{self._fmt_conf(report.mean_conf_incorrect, n_incorrect)}**")
         lines.append("")
+
+        if queue_summary:
+            lines.append(queue_summary)
 
         lines.append("## Rubric (mean axis scores across all tasks)")
         lines.append("")

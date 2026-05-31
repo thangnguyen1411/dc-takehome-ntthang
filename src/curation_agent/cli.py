@@ -19,6 +19,10 @@ from .evaluate import Evaluator
 from .ingest import Ingestor
 from .llm import build_client
 from .pipeline import Pipeline
+from .triage import prioritize
+from .triage import render_csv as render_queue_csv
+from .triage import render_markdown as render_queue_markdown
+from .triage import render_summary as render_queue_summary
 
 
 def _print_verbose(curated) -> None:
@@ -52,6 +56,10 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--report-file", default="report.md",
         help="filename for the markdown report (in --out; default: report.md)",
+    )
+    parser.add_argument(
+        "--queue-file", default="review_queue.md",
+        help="filename for the ranked human-review queue (in --out; default: review_queue.md)",
     )
     parser.add_argument(
         "--provider", choices=["anthropic", "openai"], default="anthropic",
@@ -204,13 +212,24 @@ def main(argv: list[str] | None = None) -> int:
         json.dumps([r.model_dump() for r in results], indent=2), encoding="utf-8"
     )
 
-    report_md = evaluator.render_markdown(report)
+    # Ranked human-review queue: triage every result worst-first so a curator
+    # reviews the riskiest items before the clean ones. Written as markdown + CSV,
+    # with the top few embedded in the main report.
+    queue = prioritize(results)
+    (out_dir / args.queue_file).write_text(render_queue_markdown(queue), encoding="utf-8")
+    queue_csv = Path(args.queue_file).with_suffix(".csv").name
+    (out_dir / queue_csv).write_text(render_queue_csv(queue), encoding="utf-8")
+
+    report_md = evaluator.render_markdown(report, queue_summary=render_queue_summary(queue, top_n=3))
     (out_dir / args.report_file).write_text(report_md, encoding="utf-8")
 
     print(
         f"[curation] wrote {len(results)} task files + {args.results_file} + "
-        f"{args.report_file} to {out_dir}/"
+        f"{args.report_file} + {args.queue_file} + {queue_csv} to {out_dir}/"
     )
+    high = sum(1 for it in queue if it.level == "HIGH")
+    medium = sum(1 for it in queue if it.level == "MEDIUM")
+    print(f"[curation] review queue: {high} HIGH, {medium} MEDIUM (top of {args.queue_file})")
     print(
         f"[curation] verdict accuracy {report.accuracy:.0%} "
         f"({report.correct}/{report.scored}); refinements applied: {report.refinements}"
