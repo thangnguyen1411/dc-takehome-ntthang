@@ -25,6 +25,21 @@ class LLMClient(Protocol):
         ...
 
 
+def log_llm_call(label: str, tool_name: str, prompt: str, result: dict[str, Any]) -> None:
+    """Print one LLM request + response to the terminal.
+
+    Every line carries the full tag `[LLM-<provider:model> <REQUEST|RESPONSE> <tool>]`
+    so each line is self-describing and greppable (e.g. filter by provider, by
+    direction, or by tool). Called from inside each client (the only place the raw
+    prompt/response exist) when logging is enabled via the CLI --llm-log flag.
+    """
+    req = f"[LLM-{label} REQUEST {tool_name}]"
+    res = f"[LLM-{label} RESPONSE {tool_name}]"
+    for line in prompt.splitlines():
+        print(f"{req} {line}", flush=True)
+    print(f"{res} {json.dumps(result, ensure_ascii=False)}", flush=True)
+
+
 class AnthropicLLM:
     """Calls the real Anthropic API and forces a single tool call as output.
 
@@ -32,12 +47,13 @@ class AnthropicLLM:
     than by inheritance.
     """
 
-    def __init__(self, model: str, max_tokens: int) -> None:
+    def __init__(self, model: str, max_tokens: int, log: bool = False) -> None:
         from anthropic import Anthropic  # imported lazily so offline mode needs no SDK
 
         self._client = Anthropic()
         self._model = model
         self._max_tokens = max_tokens
+        self._log = log
 
     def complete_structured(
         self,
@@ -67,7 +83,10 @@ class AnthropicLLM:
         )
         for block in response.content:
             if block.type == "tool_use" and block.name == tool_name:
-                return dict(block.input)
+                result = dict(block.input)
+                if self._log:
+                    log_llm_call(f"anthropic:{self._model}", tool_name, prompt, result)
+                return result
         raise RuntimeError(f"model did not call tool {tool_name!r}")
 
 
@@ -79,12 +98,13 @@ class OpenAILLM:
     the returned arguments are the structured result.
     """
 
-    def __init__(self, model: str, max_tokens: int) -> None:
+    def __init__(self, model: str, max_tokens: int, log: bool = False) -> None:
         from openai import OpenAI  # imported lazily so Anthropic-only runs need no SDK
 
         self._client = OpenAI()
         self._model = model
         self._max_tokens = max_tokens
+        self._log = log
 
     def complete_structured(
         self,
@@ -115,7 +135,10 @@ class OpenAILLM:
         calls = response.choices[0].message.tool_calls
         if not calls:
             raise RuntimeError(f"model did not call function {tool_name!r}")
-        return json.loads(calls[0].function.arguments)
+        result = json.loads(calls[0].function.arguments)
+        if self._log:
+            log_llm_call(f"openai:{self._model}", tool_name, prompt, result)
+        return result
 
 
 def build_client(config) -> LLMClient:
@@ -130,8 +153,8 @@ def build_client(config) -> LLMClient:
             ".env file (see .env.example) before running the curation agent."
         )
     if config.provider == "openai":
-        return OpenAILLM(config.resolved_model, config.max_tokens)
-    return AnthropicLLM(config.resolved_model, config.max_tokens)
+        return OpenAILLM(config.resolved_model, config.max_tokens, log=config.llm_log)
+    return AnthropicLLM(config.resolved_model, config.max_tokens, log=config.llm_log)
 
 
 def make_client(spec: str, config) -> LLMClient:
@@ -156,5 +179,5 @@ def make_client(spec: str, config) -> LLMClient:
         )
     model = model or DEFAULT_MODELS[provider]
     if provider == "openai":
-        return OpenAILLM(model, config.max_tokens)
-    return AnthropicLLM(model, config.max_tokens)
+        return OpenAILLM(model, config.max_tokens, log=config.llm_log)
+    return AnthropicLLM(model, config.max_tokens, log=config.llm_log)

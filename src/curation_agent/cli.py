@@ -62,6 +62,12 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="print each refinement pass and every verifier's vote per task",
     )
+    parser.add_argument(
+        "--llm-log",
+        action="store_true",
+        help="log every raw LLM request and response, tagged by provider:model "
+        "(very verbose; for debugging the model interactions)",
+    )
     args = parser.parse_args(argv)
 
     try:
@@ -72,7 +78,7 @@ def main(argv: list[str] | None = None) -> int:
         pass
 
     panel = tuple(spec.strip() for spec in args.panel.split(",") if spec.strip()) if args.panel else ()
-    config = Config(provider=args.provider, model=args.model, verifier_panel=panel)
+    config = Config(provider=args.provider, model=args.model, verifier_panel=panel, llm_log=args.llm_log)
     try:
         client = build_client(config)
     except RuntimeError as exc:
