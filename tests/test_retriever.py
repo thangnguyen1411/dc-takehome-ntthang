@@ -1,5 +1,6 @@
-"""Tests for the KeywordRetriever and its relevance threshold — no API key."""
+"""Tests for the retrievers and their relevance threshold — no API key."""
 
+from curation_agent.models import RetrievedSnippet
 from curation_agent.retriever import KeywordRetriever
 
 CORPUS = [
@@ -190,3 +191,108 @@ def test_irrelevant_corpus_with_given_evidence_is_not_flagged_failed(tmp_path):
     assert result.retrieved_evidence == []
     assert "retrieval_failed" not in result.detected_issues
     assert result.evidence[0] == "Given EGFR evidence."              # untouched
+
+
+# --- PubMedRetriever (mocked HTTP — no real network in CI) ---
+
+import json as _json
+from curation_agent.retriever import CompositeRetriever, PubMedRetriever, _overlap_score
+
+_ESEARCH_JSON = _json.dumps({"esearchresult": {"idlist": ["111", "222"]}}).encode()
+_EFETCH_XML = b"""<?xml version="1.0"?>
+<PubmedArticleSet>
+  <PubmedArticle><MedlineCitation>
+    <PMID>111</PMID>
+    <Article><ArticleTitle>EGFR mutations and gefitinib response</ArticleTitle>
+      <Abstract><AbstractText>EGFR tyrosine kinase mutations predict gefitinib sensitivity in lung cancer.</AbstractText></Abstract>
+    </Article>
+  </MedlineCitation></PubmedArticle>
+  <PubmedArticle><MedlineCitation>
+    <PMID>222</PMID>
+    <Article><ArticleTitle>Unrelated cardiology study</ArticleTitle>
+      <Abstract><AbstractText>Beta blockers reduce mortality in heart failure.</AbstractText></Abstract>
+    </Article>
+  </MedlineCitation></PubmedArticle>
+</PubmedArticleSet>"""
+
+
+def _patch_pubmed(monkeypatch, esearch=_ESEARCH_JSON, efetch=_EFETCH_XML, fail=False):
+    """Stub PubMedRetriever._get so no real HTTP happens."""
+    def fake_get(self, url, params):
+        if fail:
+            raise OSError("network down")
+        return esearch if "esearch" in url else efetch
+    monkeypatch.setattr(PubMedRetriever, "_get", fake_get)
+
+
+def test_pubmed_returns_scored_abstracts(monkeypatch):
+    _patch_pubmed(monkeypatch)
+    got = PubMedRetriever(threshold=0.1).retrieve(
+        "EGFR tyrosine kinase mutations gefitinib lung cancer", k=2
+    )
+    assert got, "expected PubMed snippets"
+    assert got[0].source.startswith("pubmed:")
+    assert "EGFR" in got[0].text                       # relevant abstract ranks first
+    assert all(0.0 <= s.score <= 1.0 for s in got)
+
+
+def test_pubmed_threshold_filters_irrelevant(monkeypatch):
+    _patch_pubmed(monkeypatch)
+    # high threshold + a query that only matches one abstract -> the off-topic one is dropped
+    got = PubMedRetriever(threshold=0.6).retrieve("EGFR gefitinib lung cancer mutations", k=5)
+    assert all("heart failure" not in s.text for s in got)
+
+
+def test_pubmed_degrades_to_empty_on_network_error(monkeypatch):
+    _patch_pubmed(monkeypatch, fail=True)
+    assert PubMedRetriever().retrieve("anything") == []   # never raises
+
+
+def test_pubmed_empty_idlist_returns_nothing(monkeypatch):
+    _patch_pubmed(monkeypatch, esearch=_json.dumps({"esearchresult": {"idlist": []}}).encode())
+    assert PubMedRetriever().retrieve("nothing matches") == []
+
+
+# --- CompositeRetriever ---
+
+class _Stub:
+    def __init__(self, snippets):
+        self._snippets = snippets
+    def retrieve(self, query, k=2):
+        return list(self._snippets)
+
+
+def _snip(text, score, source):
+    return RetrievedSnippet(text=text, score=score, source=source)
+
+
+def test_composite_merges_and_ranks_by_score():
+    a = _Stub([_snip("corpus hit", 0.5, "corpus#0")])
+    b = _Stub([_snip("pubmed hit", 0.8, "pubmed:1")])
+    got = CompositeRetriever([a, b]).retrieve("q", k=2)
+    assert [s.text for s in got] == ["pubmed hit", "corpus hit"]   # higher score first
+
+
+def test_composite_dedupes_identical_text_keeping_higher_score():
+    a = _Stub([_snip("same fact", 0.4, "corpus#0")])
+    b = _Stub([_snip("same fact", 0.9, "pubmed:1")])
+    got = CompositeRetriever([a, b]).retrieve("q", k=5)
+    assert len(got) == 1
+    assert got[0].score == 0.9 and got[0].source == "pubmed:1"
+
+
+def test_composite_top_k_caps_merged_results():
+    a = _Stub([_snip("a", 0.5, "c#0"), _snip("b", 0.4, "c#1")])
+    b = _Stub([_snip("c", 0.9, "p:1")])
+    assert len(CompositeRetriever([a, b]).retrieve("q", k=2)) == 2
+
+
+def test_composite_tolerates_an_empty_member():
+    got = CompositeRetriever([_Stub([]), _Stub([_snip("only", 0.7, "p:1")])]).retrieve("q")
+    assert [s.text for s in got] == ["only"]
+
+
+def test_overlap_score_bounds():
+    assert _overlap_score(set(), "anything") == 0.0
+    assert _overlap_score({"egfr", "gefitinib"}, "egfr drives gefitinib response") == 1.0
+    assert _overlap_score({"egfr", "statin"}, "egfr only here") == 0.5

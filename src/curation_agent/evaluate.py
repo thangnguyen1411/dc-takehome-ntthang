@@ -60,6 +60,19 @@ class Evaluator:
         self._truth = {t.task_id: t.ground_truth_signal for t in tasks}
 
     @staticmethod
+    def _fmt_conf(value: float, count: int) -> str:
+        """Render a calibration mean, distinguishing an empty bucket from a real 0.
+
+        With no cases in the bucket (e.g. 100% accuracy → no wrong answers) the
+        mean defaults to 0.0, which would read as "0% confident". Show that as
+        `n/a` instead, and include the sample count so the reader can judge how
+        much the calibration figure is worth.
+        """
+        if not count:
+            return "n/a (no such cases)"
+        return f"{value:.2f} (n={count})"
+
+    @staticmethod
     def _initial_verdict(result: CurationResult) -> str:
         """The verdict on the original candidate answer (iteration 0)."""
         return result.iterations[0].verdict.verdict if result.iterations else result.final_verdict
@@ -115,8 +128,9 @@ class Evaluator:
         lines.append(f"- Verdict accuracy, exact 4-way category (on original answers): **{report.accuracy:.0%}**")
         lines.append(f"- Verdict accuracy, binary supported-vs-flagged: **{report.binary_accuracy:.0%}**")
         lines.append(f"- Refinements applied: **{report.refinements}**")
-        lines.append(f"- Mean confidence when correct: **{report.mean_conf_correct:.2f}**")
-        lines.append(f"- Mean confidence when incorrect: **{report.mean_conf_incorrect:.2f}**")
+        n_incorrect = report.scored - report.correct
+        lines.append(f"- Mean confidence when correct: **{self._fmt_conf(report.mean_conf_correct, report.correct)}**")
+        lines.append(f"- Mean confidence when incorrect: **{self._fmt_conf(report.mean_conf_incorrect, n_incorrect)}**")
         lines.append("")
 
         lines.append("## Rubric (mean axis scores across all tasks)")

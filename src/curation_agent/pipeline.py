@@ -7,6 +7,8 @@ composition root that wires the object graph so callers don't have to.
 
 from __future__ import annotations
 
+import os
+
 from .checks import DeterministicChecker
 from .config import Config
 from .corpus import load_corpus
@@ -14,7 +16,7 @@ from .llm import LLMClient, make_client
 from .models import CurationResult, Iteration, RubricScores, Task
 from .reflector import Reflector
 from .refiner import Refiner
-from .retriever import KeywordRetriever, Retriever
+from .retriever import CompositeRetriever, KeywordRetriever, PubMedRetriever, Retriever
 from .verifier import AnswerVerifier, PanelVerifier, Verifier
 
 
@@ -45,10 +47,32 @@ class Pipeline:
 
     @staticmethod
     def _build_retriever(config: Config) -> Retriever | None:
+        """Assemble the retrieval source(s) selected in config.
+
+        Corpus and PubMed can both be enabled — they're wrapped in a
+        `CompositeRetriever` that merges their results. Returns None when
+        retrieval is off or no source is selected.
+        """
         if not config.retrieve:
             return None
-        corpus = load_corpus(config.corpus_path)
-        return KeywordRetriever(corpus, threshold=config.retrieval_threshold)
+        sources: list[Retriever] = []
+        if config.use_corpus:
+            sources.append(
+                KeywordRetriever(load_corpus(config.corpus_path), threshold=config.retrieval_threshold)
+            )
+        if config.use_pubmed:
+            # NCBI etiquette: identify the caller. Read from the environment
+            # (.env) rather than the CLI so the contact email/key aren't shell
+            # history; both are optional — PubMed works without them.
+            kwargs: dict = {"threshold": config.retrieval_threshold}
+            if os.environ.get("PUBMED_EMAIL"):
+                kwargs["email"] = os.environ["PUBMED_EMAIL"]
+            if os.environ.get("PUBMED_API_KEY"):
+                kwargs["api_key"] = os.environ["PUBMED_API_KEY"]
+            sources.append(PubMedRetriever(**kwargs))
+        if not sources:
+            return None
+        return sources[0] if len(sources) == 1 else CompositeRetriever(sources)
 
     @staticmethod
     def _build_verifier(client: LLMClient, config: Config) -> AnswerVerifier:
