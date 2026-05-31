@@ -9,33 +9,46 @@ from __future__ import annotations
 
 from .checks import DeterministicChecker
 from .config import Config
+from .corpus import load_corpus
 from .llm import LLMClient, make_client
 from .models import CurationResult, Iteration, RubricScores, Task
 from .reflector import Reflector
 from .refiner import Refiner
+from .retriever import KeywordRetriever, Retriever
 from .verifier import AnswerVerifier, PanelVerifier, Verifier
 
 
 class Pipeline:
     """Runs every task through deterministic checks + the verify/refine loop."""
 
-    def __init__(self, refiner: Refiner, config: Config) -> None:
+    def __init__(self, refiner: Refiner, config: Config, retriever: Retriever | None = None) -> None:
         self._refiner = refiner
         self._config = config
+        self._retriever = retriever
 
     @classmethod
     def build(cls, client: LLMClient, config: Config) -> "Pipeline":
-        """Composition root: assemble the verifier -> refiner -> pipeline graph.
+        """Composition root: assemble the (optional retriever ->) verifier ->
+        refiner -> pipeline graph.
 
         `client` is the primary Anthropic client, used for reflection and
         regeneration. Verification uses a single `Verifier` over that same client
         by default, or a cross-checking `PanelVerifier` when
-        `config.verifier_panel` is set.
+        `config.verifier_panel` is set. A `KeywordRetriever` over `corpus_path` is
+        attached only when `config.retrieve` is set.
         """
         verifier = cls._build_verifier(client, config)
         reflector = Reflector(client)
         refiner = Refiner(client, verifier, reflector, config)
-        return cls(refiner, config)
+        retriever = cls._build_retriever(config)
+        return cls(refiner, config, retriever)
+
+    @staticmethod
+    def _build_retriever(config: Config) -> Retriever | None:
+        if not config.retrieve:
+            return None
+        corpus = load_corpus(config.corpus_path)
+        return KeywordRetriever(corpus, threshold=config.retrieval_threshold)
 
     @staticmethod
     def _build_verifier(client: LLMClient, config: Config) -> AnswerVerifier:
@@ -68,6 +81,10 @@ class Pipeline:
         return results
 
     def _curate_task(self, task: Task, checker: DeterministicChecker) -> CurationResult:
+        # Optional retrieval: when configured, fetch corpus snippets into the
+        # task's `relevant_knowledge` (its given `reference_context` is untouched).
+        task, retrieved, retrieval_issues = self._maybe_retrieve(task)
+
         det_issues = checker.issues_for(task)
         iterations = self._refiner.refine(task)
 
@@ -78,7 +95,8 @@ class Pipeline:
         )
         rubric_issues = self._rubric_issues(final.verdict.rubric)
         all_issues = sorted(
-            set(det_issues) | set(final.verdict.detected_issues) | set(derived) | set(rubric_issues)
+            set(det_issues) | set(final.verdict.detected_issues)
+            | set(derived) | set(rubric_issues) | set(retrieval_issues)
         )
 
         return CurationResult(
@@ -89,11 +107,42 @@ class Pipeline:
             agent_reasoning_summary=self._summarize(iterations, refined),
             refinement_applied=refined,
             final_answer=final.answer,
-            evidence=[task.reference_context],
+            evidence=self._evidence_list(task),
             final_verdict=final.verdict.verdict,
             rubric_scores=final.verdict.rubric,
+            retrieved_evidence=retrieved,
             iterations=iterations,
         )
+
+    def _maybe_retrieve(self, task: Task):
+        """When retrieval is on, fetch corpus snippets into `relevant_knowledge`.
+
+        Returns (effective_task, retrieved_snippets, issue_tags). The task's given
+        `reference_context` is never touched — retrieved text lands in the separate
+        `relevant_knowledge` field, and `Task.evidence_block()` combines the two
+        with PRIMARY/SUPPLEMENTARY precedence at prompt time. Only snippets
+        clearing the relevance threshold are kept; if a task had no given evidence
+        and nothing clears it, `retrieval_failed` is tagged so the verdict stays
+        honest.
+        """
+        if self._retriever is None:
+            return task, [], []
+        had_evidence = bool(task.reference_context.strip())
+        snippets = self._retriever.retrieve(task.question, k=self._config.retrieval_top_k)
+        if not snippets:
+            # Nothing relevant; only a problem if the task had no evidence to begin with.
+            return task, [], [] if had_evidence else ["retrieval_failed"]
+        retrieved_text = "\n".join(s.text for s in snippets)
+        return task.model_copy(update={"relevant_knowledge": retrieved_text}), snippets, ["evidence_retrieved"]
+
+    @staticmethod
+    def _evidence_list(task: Task) -> list[str]:
+        """The evidence actually used, as a clean list — given first, then any
+        retrieved knowledge as a separate entry (no inline section labels)."""
+        evidence = [task.reference_context] if task.reference_context.strip() else []
+        if task.relevant_knowledge.strip():
+            evidence.append(task.relevant_knowledge)
+        return evidence
 
     def _derived_issues(self, question_quality_score: float, confidence: float) -> list[str]:
         """Threshold-driven issue tags not produced directly by the verifier.

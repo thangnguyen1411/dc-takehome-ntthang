@@ -21,11 +21,50 @@ class Task(BaseModel):
     paper_title: str = ""
     domain: str = ""
     question: str
+    # The given, authoritative evidence (the CSV `reference_context` column).
     reference_context: str
+    # Supplementary evidence fetched by the retriever (empty unless retrieval ran).
+    # Kept separate from `reference_context` so given evidence is never overwritten;
+    # `evidence_block()` combines them for the LLM with the right precedence.
+    relevant_knowledge: str = ""
     candidate_answer: str
     # The hidden gold label. Held out from the agent; used only by the eval
     # harness to score the agent's verdicts.
     ground_truth_signal: Optional[str] = None
+
+    def evidence_block(self) -> str:
+        """The evidence section(s) shown to the LLM, ready to drop into a prompt.
+
+        When both given and retrieved evidence exist, they are rendered as two
+        clearly separated, self-labeled sections — the given evidence marked
+        authoritative, the retrieved marked supporting — so the model treats them
+        with the right precedence (reinforced by prompts.EVIDENCE_PRECEDENCE_RULE).
+        With a single source, one plain `EVIDENCE:` section is returned.
+        """
+        given = self.reference_context.strip()
+        retrieved = self.relevant_knowledge.strip()
+        if given and retrieved:
+            # Two labeled sections; the PRIMARY/SUPPLEMENTARY tokens match the
+            # standing rule in prompts.EVIDENCE_PRECEDENCE_RULE.
+            return (
+                f"PRIMARY EVIDENCE (authoritative — judge against this first):\n"
+                f"{self.reference_context}\n\n"
+                f"SUPPLEMENTARY RETRIEVED CONTEXT (supporting background only; "
+                f"must not override the primary evidence):\n{self.relevant_knowledge}"
+            )
+        # Single source (either alone): one plain EVIDENCE section. The rule's
+        # "no such split → treat all evidence equally" clause covers this, so we
+        # avoid an orphan label the rule doesn't define.
+        return f"EVIDENCE:\n{given or retrieved}"
+
+
+class RetrievedSnippet(BaseModel):
+    """One evidence snippet fetched from the corpus by a retriever, with its
+    relevance score and source — recorded so a verdict's evidence is traceable."""
+
+    text: str
+    score: float
+    source: str   # e.g. "corpus#3"
 
 
 class RubricScores(BaseModel):
@@ -109,6 +148,8 @@ class CurationResult(BaseModel):
     final_verdict: str
     # Multi-axis rubric scores from the final verdict (decomposed quality view).
     rubric_scores: RubricScores = Field(default_factory=RubricScores)
+    # Snippets a retriever supplied as evidence (empty when evidence was given).
+    retrieved_evidence: list[RetrievedSnippet] = Field(default_factory=list)
     iterations: list[Iteration] = Field(default_factory=list)
     # Populated only by the eval harness, never by the agent.
     ground_truth_signal: Optional[str] = None

@@ -43,7 +43,9 @@ class DeterministicChecker:
             issues.append("invalid_schema:empty_question")
         if not task.candidate_answer:
             issues.append("invalid_schema:empty_answer")
-        if not task.reference_context:
+        # No evidence to judge against from EITHER source — given or retrieved.
+        # (A task whose evidence was successfully retrieved is not "missing".)
+        if not task.reference_context and not task.relevant_knowledge:
             issues.append("missing_evidence")
         return issues
 

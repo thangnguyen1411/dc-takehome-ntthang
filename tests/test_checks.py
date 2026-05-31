@@ -22,6 +22,18 @@ def test_schema_issues_flags_empty_evidence():
     assert "missing_evidence" in issues
 
 
+def test_retrieved_knowledge_counts_as_evidence():
+    # a task with no given evidence but with retrieved relevant_knowledge is NOT
+    # "missing_evidence" — retrieval supplied something to judge against
+    t = _task(reference_context="", relevant_knowledge="Retrieved fact.")
+    assert "missing_evidence" not in DeterministicChecker.schema_issues(t)
+
+
+def test_missing_evidence_when_both_sources_empty():
+    t = _task(reference_context="", relevant_knowledge="")
+    assert "missing_evidence" in DeterministicChecker.schema_issues(t)
+
+
 def test_schema_issues_clean_task_has_none():
     assert DeterministicChecker.schema_issues(_task()) == []
 

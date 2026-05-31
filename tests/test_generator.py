@@ -72,8 +72,8 @@ def test_generated_task_round_trips_through_validation():
     assert Task(**task.model_dump()).ground_truth_signal == "supported"
 
 
-def test_read_evidence_skips_comments_and_blanks(tmp_path):
-    from curation_agent.generate import _read_evidence
+def test_load_corpus_skips_comments_and_blanks(tmp_path):
+    from curation_agent.corpus import load_corpus
 
     f = tmp_path / "ev.txt"
     f.write_text(
@@ -84,15 +84,33 @@ def test_read_evidence_skips_comments_and_blanks(tmp_path):
         "Second real snippet.\n",
         encoding="utf-8",
     )
-    assert _read_evidence(f) == ["First real snippet.", "Second real snippet."]
+    assert load_corpus(f) == ["First real snippet.", "Second real snippet."]
 
 
-def test_bundled_evidence_file_is_readable():
-    # the shipped data/evidence.txt parses to real snippets (comments stripped)
+def test_load_corpus_reads_a_folder_of_txt_files(tmp_path):
+    from curation_agent.corpus import load_corpus
+
+    (tmp_path / "a.txt").write_text("# header\nAlpha snippet.\n", encoding="utf-8")
+    (tmp_path / "b.txt").write_text("Beta snippet.\n", encoding="utf-8")
+    (tmp_path / "ignore.md").write_text("Not a txt file.\n", encoding="utf-8")
+    # folder: every *.txt in sorted name order, comments stripped, .md ignored
+    assert load_corpus(tmp_path) == ["Alpha snippet.", "Beta snippet."]
+
+
+def test_load_corpus_missing_path_raises(tmp_path):
+    import pytest
+
+    from curation_agent.corpus import load_corpus
+
+    with pytest.raises(FileNotFoundError):
+        load_corpus(tmp_path / "nope")
+
+
+def test_bundled_corpus_folder_is_readable():
     from pathlib import Path
 
-    from curation_agent.generate import _read_evidence
+    from curation_agent.corpus import load_corpus
 
-    snippets = _read_evidence(Path(__file__).resolve().parents[1] / "data" / "evidence.txt")
-    assert len(snippets) >= 14
+    snippets = load_corpus(Path(__file__).resolve().parents[1] / "data" / "corpus")
+    assert len(snippets) >= 20
     assert all(not s.startswith("#") for s in snippets)

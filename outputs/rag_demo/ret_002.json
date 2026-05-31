@@ -1,0 +1,55 @@
+{
+  "task_id": "ret_002",
+  "question_quality_score": 1.0,
+  "answer_confidence": 0.9,
+  "detected_issues": [
+    "evidence_retrieved"
+  ],
+  "agent_reasoning_summary": "Answer judged 'supported' (confidence 0.90). The answer's central claim — that EGFR tyrosine kinase domain mutations predict gefitinib response in NSCLC — is directly backed by the primary evidence (mutations in 8 of 9 responders vs 0 of 7 non-responders). The specific exon 19 deletion and L858R details come from the supplementary context, which is consistent with and supports the primary evidence.",
+  "refinement_applied": false,
+  "final_answer": "EGFR tyrosine kinase domain mutations, such as exon 19 deletions and the L858R substitution, predict response to gefitinib in non-small cell lung cancer.",
+  "evidence": [
+    "In a 2004 series, somatic EGFR tyrosine kinase domain mutations were found in 8 of 9 gefitinib-responsive lung tumors but in 0 of 7 non-responding tumors.",
+    "Activating EGFR mutations in the tyrosine kinase domain — most commonly exon 19 deletions and the exon 21 L858R point mutation — predict sensitivity to EGFR tyrosine kinase inhibitors such as gefitinib in non-small cell lung cancer.\nThe EML4-ALK fusion, formed by an inversion on chromosome 2, occurs in roughly 3 to 5 percent of non-small cell lung cancers and produces a constitutively active kinase that responds to the ALK inhibitor crizotinib."
+  ],
+  "final_verdict": "supported",
+  "rubric_scores": {
+    "faithfulness": 1.0,
+    "completeness": 0.95,
+    "specificity": 0.9
+  },
+  "retrieved_evidence": [
+    {
+      "text": "Activating EGFR mutations in the tyrosine kinase domain — most commonly exon 19 deletions and the exon 21 L858R point mutation — predict sensitivity to EGFR tyrosine kinase inhibitors such as gefitinib in non-small cell lung cancer.",
+      "score": 0.7037,
+      "source": "corpus#22"
+    },
+    {
+      "text": "The EML4-ALK fusion, formed by an inversion on chromosome 2, occurs in roughly 3 to 5 percent of non-small cell lung cancers and produces a constitutively active kinase that responds to the ALK inhibitor crizotinib.",
+      "score": 0.2662,
+      "source": "corpus#23"
+    }
+  ],
+  "iterations": [
+    {
+      "step": 0,
+      "answer": "EGFR tyrosine kinase domain mutations, such as exon 19 deletions and the L858R substitution, predict response to gefitinib in non-small cell lung cancer.",
+      "verdict": {
+        "verdict": "supported",
+        "confidence": 0.9,
+        "question_quality_score": 1.0,
+        "rubric": {
+          "faithfulness": 1.0,
+          "completeness": 0.95,
+          "specificity": 0.9
+        },
+        "detected_issues": [],
+        "rationale": "The answer's central claim — that EGFR tyrosine kinase domain mutations predict gefitinib response in NSCLC — is directly backed by the primary evidence (mutations in 8 of 9 responders vs 0 of 7 non-responders). The specific exon 19 deletion and L858R details come from the supplementary context, which is consistent with and supports the primary evidence."
+      },
+      "refined": false,
+      "reflection": null
+    }
+  ],
+  "ground_truth_signal": "supported",
+  "verdict_matches_ground_truth": true
+}

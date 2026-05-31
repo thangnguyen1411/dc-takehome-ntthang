@@ -46,6 +46,14 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--csv", default="data/tasks.csv", help="path to the task CSV")
     parser.add_argument("--out", default="outputs", help="output directory")
     parser.add_argument(
+        "--results-file", default="results.json",
+        help="filename for the aggregate JSON results (in --out; default: results.json)",
+    )
+    parser.add_argument(
+        "--report-file", default="report.md",
+        help="filename for the markdown report (in --out; default: report.md)",
+    )
+    parser.add_argument(
         "--provider", choices=["anthropic", "openai"], default="anthropic",
         help="model provider (default: anthropic)",
     )
@@ -68,6 +76,15 @@ def main(argv: list[str] | None = None) -> int:
         help="log every raw LLM request and response, tagged by provider:model "
         "(very verbose; for debugging the model interactions)",
     )
+    parser.add_argument(
+        "--retrieve",
+        action="store_true",
+        help="augment every task's evidence with relevant snippets from the corpus (RAG)",
+    )
+    parser.add_argument(
+        "--corpus", default="data/corpus",
+        help="knowledge corpus for --retrieve: a .txt file or folder of .txt files",
+    )
     args = parser.parse_args(argv)
 
     try:
@@ -78,7 +95,10 @@ def main(argv: list[str] | None = None) -> int:
         pass
 
     panel = tuple(spec.strip() for spec in args.panel.split(",") if spec.strip()) if args.panel else ()
-    config = Config(provider=args.provider, model=args.model, verifier_panel=panel, llm_log=args.llm_log)
+    config = Config(
+        provider=args.provider, model=args.model, verifier_panel=panel,
+        llm_log=args.llm_log, retrieve=args.retrieve, corpus_path=args.corpus,
+    )
     try:
         client = build_client(config)
     except RuntimeError as exc:
@@ -87,6 +107,8 @@ def main(argv: list[str] | None = None) -> int:
     primary = f"{config.provider}:{config.resolved_model}"
     verifier_backend = " + ".join(config.verifier_panel) if config.verifier_panel else primary
     print(f"[curation] verifier: {verifier_backend} | regeneration: {primary}")
+    if config.retrieve:
+        print(f"[curation] retrieval: ON (corpus: {config.corpus_path})")
 
     tasks = Ingestor().load(args.csv)
     print(f"[curation] loaded {len(tasks)} tasks from {args.csv}")
@@ -140,15 +162,18 @@ def main(argv: list[str] | None = None) -> int:
         path = out_dir / f"{result.task_id}.json"
         path.write_text(result.model_dump_json(indent=2), encoding="utf-8")
 
-    aggregate = out_dir / "results.json"
+    aggregate = out_dir / args.results_file
     aggregate.write_text(
         json.dumps([r.model_dump() for r in results], indent=2), encoding="utf-8"
     )
 
     report_md = evaluator.render_markdown(report)
-    (out_dir / "report.md").write_text(report_md, encoding="utf-8")
+    (out_dir / args.report_file).write_text(report_md, encoding="utf-8")
 
-    print(f"[curation] wrote {len(results)} task files + results.json + report.md to {out_dir}/")
+    print(
+        f"[curation] wrote {len(results)} task files + {args.results_file} + "
+        f"{args.report_file} to {out_dir}/"
+    )
     print(
         f"[curation] verdict accuracy {report.accuracy:.0%} "
         f"({report.correct}/{report.scored}); refinements applied: {report.refinements}"

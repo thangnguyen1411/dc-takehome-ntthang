@@ -1,10 +1,11 @@
-"""CLI to generate a labeled benchmark CSV from evidence snippets.
+"""CLI to generate a labeled benchmark CSV from a knowledge corpus.
 
-    python -m curation_agent.generate --evidence data/evidence.txt --out data/generated_tasks.csv
+    python -m curation_agent.generate --corpus data/corpus --out data/generated_tasks.csv
 
-Reads one evidence snippet per non-empty line, and for each generates one task
-per target verdict (cycling through the taxonomy), writing a tab-separated CSV in
-the same format the curation pipeline ingests. Requires an API key.
+Reads evidence snippets from a corpus (a file or a folder of `.txt` files), and
+for each generates one task per target verdict (cycling through the taxonomy),
+writing a tab-separated CSV in the same format the curation pipeline ingests.
+Requires an API key.
 """
 
 from __future__ import annotations
@@ -16,7 +17,8 @@ from itertools import cycle
 from pathlib import Path
 
 from .config import Config
-from .generator import FLAW_INSTRUCTIONS, BenchmarkGenerator
+from .corpus import load_corpus
+from .generator import BenchmarkGenerator
 from .llm import build_client
 from .models import Task
 
@@ -27,14 +29,6 @@ CSV_COLUMNS = [
     "task_id", "paper_title", "domain", "question",
     "reference_context", "candidate_answer", "ground_truth_signal",
 ]
-
-
-def _read_evidence(path: Path) -> list[str]:
-    """One evidence snippet per line; blank lines and `#` comments are skipped."""
-    if not path.exists():
-        raise FileNotFoundError(f"evidence file not found: {path}")
-    lines = path.read_text(encoding="utf-8").splitlines()
-    return [s for line in lines if (s := line.strip()) and not s.startswith("#")]
 
 
 def _write_csv(path: Path, tasks: list[Task]) -> None:
@@ -56,7 +50,10 @@ def _write_csv(path: Path, tasks: list[Task]) -> None:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Generate a labeled curation benchmark")
-    parser.add_argument("--evidence", default="data/evidence.txt", help="file of evidence snippets, one per line")
+    parser.add_argument(
+        "--corpus", default="data/corpus",
+        help="evidence corpus: a .txt file or a folder of .txt files (one snippet per line)",
+    )
     parser.add_argument("--out", default="data/generated_tasks.csv", help="output CSV path")
     parser.add_argument("--per-evidence", type=int, default=1, help="tasks to generate per evidence snippet")
     parser.add_argument(
@@ -81,20 +78,21 @@ def main(argv: list[str] | None = None) -> int:
         return 1
 
     try:
-        snippets = _read_evidence(Path(args.evidence))
+        snippets = load_corpus(args.corpus)
     except FileNotFoundError as exc:
         print(f"[generate] {exc}", file=sys.stderr)
         return 1
     if not snippets:
-        print(f"[generate] no evidence snippets in {args.evidence}", file=sys.stderr)
+        print(f"[generate] no evidence snippets found in {args.corpus}", file=sys.stderr)
         return 1
 
     generator = BenchmarkGenerator(client)
     targets = cycle(DEFAULT_TARGETS)
     tasks: list[Task] = []
     counter = 0
-    print(f"[generate] {len(snippets)} snippets x {args.per_evidence} = "
-          f"{len(snippets) * args.per_evidence} tasks via {config.provider}:{config.resolved_model}", flush=True)
+    total = len(snippets) * args.per_evidence
+    print(f"[generate] {len(snippets)} snippets x {args.per_evidence} = {total} tasks "
+          f"via {config.provider}:{config.resolved_model}", flush=True)
 
     for snippet in snippets:
         for _ in range(args.per_evidence):

@@ -1,0 +1,9 @@
+# Genetics & rare disease — molecular causes and gene/molecular therapies.
+# Real, well-established findings paraphrased from authoritative public sources
+# (NIH/MedlinePlus, FDA, GeneReviews/NCBI, PubMed/PMC). One statement per line.
+Casgevy (exagamglogene autotemcel), approved by the FDA in December 2023, uses CRISPR-Cas9 to disrupt the BCL11A erythroid enhancer in a patient's hematopoietic stem cells, reactivating fetal hemoglobin production in sickle cell disease.
+Sickle cell disease arises from a single point mutation in the HBB gene that substitutes valine for glutamic acid at position 6 of beta-globin (Glu6Val), causing hemoglobin S to polymerize under low-oxygen conditions.
+Ivacaftor is a CFTR potentiator that increases channel-opening probability in the class III G551D gating mutation, the most common gating mutation in cystic fibrosis, improving lung function in affected patients.
+Huntington disease is an autosomal-dominant neurodegenerative disorder caused by an expanded CAG trinucleotide repeat in exon 1 of the HTT gene; alleles of 40 or more repeats are fully penetrant, and repeat length predicts age of onset.
+Duchenne muscular dystrophy is an X-linked recessive disorder caused by loss-of-function mutations in the DMD gene at Xp21, which encodes dystrophin, a large protein that anchors the muscle-cell cytoskeleton to the sarcolemma.
+The APOE ε4 allele is the strongest known genetic risk factor for late-onset Alzheimer's disease, acting in a dose-dependent manner, while the APOE ε2 allele is protective.

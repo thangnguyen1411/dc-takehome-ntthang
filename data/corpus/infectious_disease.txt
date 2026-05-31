@@ -1,0 +1,8 @@
+# Infectious disease — pathogens, antimicrobials, and vaccines.
+# Real, well-established findings paraphrased from authoritative public sources
+# (NIH/CDC/PubMed/PMC, NobelPrize.org). One self-contained statement per line.
+Helicobacter pylori, a spiral bacterium that colonizes the gastric lining, is the primary cause of peptic ulcer disease — a discovery by Marshall and Warren recognized with the 2005 Nobel Prize in Physiology or Medicine.
+Isoniazid and rifampicin are the two most effective first-line antituberculosis drugs, and multidrug-resistant tuberculosis is defined by Mycobacterium tuberculosis resistant to both; standard therapy combines isoniazid, rifampicin, pyrazinamide, and ethambutol.
+CCR5 is a chemokine co-receptor that R5-tropic HIV-1 uses to enter CD4-positive T cells, and CCR5 antagonists such as maraviroc block viral entry by binding this receptor.
+The BNT162b2 and mRNA-1273 COVID-19 vaccines deliver nucleoside-modified mRNA encoding a prefusion-stabilized SARS-CoV-2 spike protein inside lipid nanoparticles, eliciting neutralizing antibodies against the spike.
+The quadrivalent and nonavalent HPV vaccines use virus-like particles of the L1 capsid protein to prevent infection by high-risk human papillomavirus types that cause the majority of cervical cancers.

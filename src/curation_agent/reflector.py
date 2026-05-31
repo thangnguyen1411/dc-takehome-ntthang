@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from .llm import LLMClient
 from .models import Iteration, ReflectionPlan, Task
+from .prompts import EVIDENCE_PRECEDENCE_RULE
 
 
 class Reflector:
@@ -23,7 +24,9 @@ and do NOT re-judge it. Instead, plan the fix:
 - what_to_change: the concrete correction the rewrite must make, grounded only in
   the evidence (e.g. "drop the superlative 'strongest' which evidence says only 'significant'").
 - what_to_keep: any part of the prior answer that was already correct and should be preserved.
-Be specific and evidence-anchored; this plan will guide a separate rewrite step."""
+Be specific and evidence-anchored; this plan will guide a separate rewrite step.
+
+""" + EVIDENCE_PRECEDENCE_RULE
 
     SCHEMA = {
         "type": "object",
@@ -49,7 +52,7 @@ Be specific and evidence-anchored; this plan will guide a separate rewrite step.
         )
         prompt = (
             f"QUESTION: {task.question}\n\n"
-            f"EVIDENCE: {task.reference_context}\n\n"
+            f"{task.evidence_block()}\n\n"
             f"FAILED ATTEMPTS:\n{attempts}\n\n"
             f"Plan how to fix the answer."
         )
