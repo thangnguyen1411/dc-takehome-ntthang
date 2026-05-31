@@ -391,7 +391,7 @@ auditable output set.
 
 ## 9. Results & error analysis
 
-Run on the 10-row benchmark with `claude-opus-4-8` (held-out `ground_truth_signal`):
+Run on the 10-row benchmark with `claude-sonnet-4-6` (held-out `ground_truth_signal`):
 
 - **Exact 4-way category accuracy: ~50%.** Harsh, because the categories overlap
   (a reversed claim is *both* a contradiction and a fabrication).

@@ -70,7 +70,7 @@ def main(argv: list[str] | None = None) -> int:
         "--panel",
         default=None,
         help="comma-separated verifier panel of provider:model specs for cross-checking, "
-        "e.g. 'anthropic:claude-opus-4-8,openai:gpt-4o' (default: single verifier). "
+        "e.g. 'anthropic:claude-sonnet-4-6,openai:gpt-4o' (default: single verifier). "
         "Each provider listed needs its own API key.",
     )
     parser.add_argument(
