@@ -48,6 +48,10 @@ class Config:
     # their firmer tiers on hard cases.
     max_refine_iterations: int = 3
     max_tokens: int = 1024
+    # Sampling temperature for every LLM call. Default 0 for reproducible
+    # verification — a curation judge should give the same verdict for the same
+    # input. Raise it only for deliberately diverse sampling (e.g. self-consistency).
+    temperature: float = 0.0
     # When True, each client prints every LLM request + response, tagged by
     # provider:model (see log_llm_call). Enabled via --llm-log; verbose and noisy.
     llm_log: bool = False
