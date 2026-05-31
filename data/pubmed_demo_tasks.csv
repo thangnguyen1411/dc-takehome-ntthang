@@ -1,0 +1,3 @@
+task_id	paper_title	domain	question	reference_context	candidate_answer	ground_truth_signal
+pm_001		immuno_oncology	How do PD-1 immune checkpoint inhibitors act in cancer immunotherapy?		PD-1 inhibitors kill tumor cells directly through antibody-dependent cellular cytotoxicity, working independently of T lymphocytes.	contradicted
+pm_002	DAPA-HF	cardiometabolic	What effect do SGLT2 inhibitors have on heart failure hospitalization?	In the DAPA-HF trial, dapagliflozin reduced the risk of worsening heart failure or cardiovascular death by 26% in patients with heart failure and reduced ejection fraction.	SGLT2 inhibitors reduce the risk of hospitalization for heart failure in patients with and without type 2 diabetes.	supported

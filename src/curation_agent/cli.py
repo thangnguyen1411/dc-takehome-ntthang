@@ -79,11 +79,19 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--retrieve",
         action="store_true",
-        help="augment every task's evidence with relevant snippets from the corpus (RAG)",
+        help="augment every task's evidence with retrieved snippets (RAG). "
+        "Pick source(s) with --corpus and/or --pubmed; both can be combined.",
     )
     parser.add_argument(
-        "--corpus", default="data/corpus",
-        help="knowledge corpus for --retrieve: a .txt file or folder of .txt files",
+        "--corpus", default="",
+        help="retrieve from this local corpus (a .txt file or folder of .txt files). "
+        "Omit to use no corpus.",
+    )
+    parser.add_argument(
+        "--pubmed",
+        action="store_true",
+        help="retrieve live abstracts from PubMed (requires network access); "
+        "combine with --corpus to use both",
     )
     args = parser.parse_args(argv)
 
@@ -95,10 +103,17 @@ def main(argv: list[str] | None = None) -> int:
         pass
 
     panel = tuple(spec.strip() for spec in args.panel.split(",") if spec.strip()) if args.panel else ()
+    # A source is used only if selected: --corpus PATH enables the corpus,
+    # --pubmed enables PubMed. Either or both.
     config = Config(
         provider=args.provider, model=args.model, verifier_panel=panel,
         llm_log=args.llm_log, retrieve=args.retrieve, corpus_path=args.corpus,
+        use_corpus=bool(args.corpus), use_pubmed=args.pubmed,
     )
+    if config.retrieve and not (config.use_corpus or config.use_pubmed):
+        print("[curation] --retrieve needs a source: pass --corpus PATH and/or --pubmed.",
+              file=sys.stderr)
+        return 1
     try:
         client = build_client(config)
     except RuntimeError as exc:
@@ -108,7 +123,9 @@ def main(argv: list[str] | None = None) -> int:
     verifier_backend = " + ".join(config.verifier_panel) if config.verifier_panel else primary
     print(f"[curation] verifier: {verifier_backend} | regeneration: {primary}")
     if config.retrieve:
-        print(f"[curation] retrieval: ON (corpus: {config.corpus_path})")
+        sources = ([f"corpus:{config.corpus_path}"] if config.use_corpus else []) \
+            + (["pubmed"] if config.use_pubmed else [])
+        print(f"[curation] retrieval: ON ({' + '.join(sources)})")
 
     tasks = Ingestor().load(args.csv)
     print(f"[curation] loaded {len(tasks)} tasks from {args.csv}")

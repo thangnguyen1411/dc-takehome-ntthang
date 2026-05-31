@@ -54,8 +54,12 @@ class Config:
     retrieve: bool = False
     corpus_path: str = "data/corpus"
     retrieval_threshold: float = 0.25
-    # How many corpus snippets to pull per task (those clearing the threshold).
+    # How many snippets to pull per task (those clearing the threshold).
     retrieval_top_k: int = 2
+    # Retrieval sources (used when `retrieve` is on). The local corpus and live
+    # PubMed can be enabled together — a CompositeRetriever merges their results.
+    use_corpus: bool = True
+    use_pubmed: bool = False
 
     @property
     def resolved_model(self) -> str:
