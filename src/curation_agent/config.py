@@ -12,7 +12,7 @@ from dataclasses import dataclass
 # Default model + API-key env var per provider, used when the CLI doesn't
 # override the model explicitly.
 DEFAULT_MODELS: dict[str, str] = {
-    "anthropic": "claude-opus-4-8",
+    "anthropic": "claude-sonnet-4-6",
     "openai": "gpt-4o",
 }
 API_KEY_ENV: dict[str, str] = {

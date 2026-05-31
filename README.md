@@ -181,11 +181,11 @@ pass), so every refinement step is auditable.
 ```bash
 # Cross-model panel (needs OPENAI_API_KEY too)
 PYTHONPATH=src python -m curation_agent.cli --csv data/tasks.csv \
-  --panel "anthropic:claude-opus-4-8,openai:gpt-4o"
+  --panel "anthropic:claude-sonnet-4-6,openai:gpt-4o"
 
 # Multi-agent debate
 PYTHONPATH=src python -m curation_agent.cli --csv data/tasks.csv \
-  --panel "anthropic:claude-opus-4-8,anthropic:claude-sonnet-4-6" --debate
+  --panel "anthropic:claude-sonnet-4-6,anthropic:claude-opus-4-6" --debate
 
 # RAG: local corpus + live PubMed
 PYTHONPATH=src python -m curation_agent.cli --csv data/pubmed_demo_tasks.csv \
